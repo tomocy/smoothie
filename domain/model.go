@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
-type User struct{}
+type User struct {
+	ID string
+}
 
 type Posts []*Post
 
