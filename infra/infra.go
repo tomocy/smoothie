@@ -65,3 +65,7 @@ func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
 
 	return client.Get(http.DefaultClient, r.cred, r.url, r.params)
 }
+
+type twitterConfig struct {
+	AccessCredentials *oauth.Credentials `json:"access_credentials"`
+}
