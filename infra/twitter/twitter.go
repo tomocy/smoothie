@@ -8,6 +8,15 @@ import (
 
 type Tweets []*Tweet
 
+func (ts Tweets) Adapt() domain.Posts {
+	adapteds := make(domain.Posts, len(ts))
+	for i, t := range ts {
+		adapteds[i] = t.Adapt()
+	}
+
+	return adapteds
+}
+
 type Tweet struct {
 	ID        string `json:"id_str"`
 	Text      string `json:"text"`
