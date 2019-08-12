@@ -16,6 +16,7 @@ func (ps *Posts) SortByNewest() {
 type Post struct {
 	ID        string
 	Driver    string
+	User      *User
 	Text      string
 	CreatedAt time.Time
 }
