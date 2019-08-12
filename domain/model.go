@@ -6,8 +6,9 @@ import (
 )
 
 type User struct {
-	ID   string
-	Name string
+	ID       string
+	Name     string
+	Username string
 }
 
 type Posts []*Post
