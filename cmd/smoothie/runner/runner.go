@@ -28,6 +28,10 @@ type Continue struct {
 	presenter presenter
 }
 
+func (c *Continue) Run() error {
+	return c.fetchAndShowPostsOfDrivers()
+}
+
 func (c *Continue) fetchAndShowPostsOfDrivers() error {
 	ps, err := c.fetchPostsOfDrivers()
 	if err != nil {
