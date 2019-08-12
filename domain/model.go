@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-type User struct {
-	Drivers []string
-}
+type User struct{}
 
 type Posts []*Post
 
