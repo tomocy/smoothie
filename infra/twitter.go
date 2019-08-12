@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -45,4 +46,14 @@ func (t *Twitter) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Cr
 	token, _, err := t.oauthClient.RequestToken(http.DefaultClient, temp, pin)
 
 	return token, err
+}
+
+func (t *Twitter) do(r oauthReq, dst interface{}) error {
+	resp, err := r.do(t.oauthClient)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return json.NewDecoder(resp.Body).Decode(dst)
 }
