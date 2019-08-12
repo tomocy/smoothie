@@ -30,6 +30,17 @@ const (
 	formatText = "text"
 )
 
+func newPresenter(mode, format string) presenter {
+	switch mode {
+	case modeCLI:
+		return &cli{
+			printer: newPrinter(format),
+		}
+	default:
+		return nil
+	}
+}
+
 type presenter interface {
 	ShowPosts(domain.Posts)
 }
