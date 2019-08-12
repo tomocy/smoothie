@@ -52,3 +52,11 @@ type User struct {
 	Name       string `json:"name"`
 	ScreenName string `json:"screen_name"`
 }
+
+func (u *User) Adapt() *domain.User {
+	return &domain.User{
+		ID:       u.ID,
+		Name:     u.Name,
+		Username: u.ScreenName,
+	}
+}
