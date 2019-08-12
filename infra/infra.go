@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -56,6 +57,22 @@ func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
 	}
 
 	return client.Get(http.DefaultClient, r.cred, r.url, r.params)
+}
+
+func loadConfig() (config, error) {
+	name := configFilename()
+	src, err := os.Open(name)
+	if err != nil {
+		return config{}, err
+	}
+	defer src.Close()
+
+	var loaded config
+	if err := json.NewDecoder(src).Decode(&loaded); err != nil {
+		return config{}, err
+	}
+
+	return loaded, nil
 }
 
 type config struct {
