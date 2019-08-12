@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/garyburd/go-oauth/oauth"
+	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/twitter"
 )
 
@@ -27,6 +28,15 @@ func NewTwitter(id, secret string) *Twitter {
 
 type Twitter struct {
 	oauthClient oauth.Client
+}
+
+func (t *Twitter) FetchPosts() (domain.Posts, error) {
+	ts, err := t.fetchTweets(t.endpoint("/statuses/home_timeline.json"), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch posts: %s", err)
+	}
+
+	return ts.Adapt(), nil
 }
 
 func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, error) {
