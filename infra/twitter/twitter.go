@@ -2,6 +2,8 @@ package twitter
 
 import "time"
 
+type Tweets []*Tweet
+
 type Tweet struct {
 	ID        string `json:"id_str"`
 	Text      string `json:"text"`
