@@ -75,6 +75,17 @@ func loadConfig() (config, error) {
 	return loaded, nil
 }
 
+func saveConfig(cnf config) error {
+	name := configFilename()
+	dst, err := os.OpenFile(name, os.O_WRONLY, 0700)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	return json.NewEncoder(dst).Encode(cnf)
+}
+
 type config struct {
 	Twitter twitterConfig `json:"twitter"`
 }
