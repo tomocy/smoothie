@@ -1,11 +1,14 @@
 package infra
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"path/filepath"
+
+	"github.com/tomocy/deverr"
 
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/tomocy/smoothie/domain"
@@ -28,6 +31,16 @@ func NewTwitter(id, secret string) *Twitter {
 
 type Twitter struct {
 	oauthClient oauth.Client
+}
+
+func (t *Twitter) StreamPosts(context.Context) (<-chan domain.Posts, <-chan error) {
+	errCh := make(chan error)
+	go func() {
+		defer close(errCh)
+		errCh <- deverr.NotImplemented
+	}()
+
+	return nil, errCh
 }
 
 func (t *Twitter) FetchPosts() (domain.Posts, error) {

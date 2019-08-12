@@ -1,10 +1,12 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
 
+	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
 )
 
@@ -50,6 +52,16 @@ func newMock(d string) *mock {
 
 type mock struct {
 	ps domain.Posts
+}
+
+func (m *mock) StreamPosts(context.Context) (<-chan domain.Posts, <-chan error) {
+	errCh := make(chan error)
+	go func() {
+		defer close(errCh)
+		errCh <- deverr.NotImplemented
+	}()
+
+	return nil, errCh
 }
 
 func (m *mock) FetchPosts() (domain.Posts, error) {
