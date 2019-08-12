@@ -9,6 +9,20 @@ import (
 	"github.com/tomocy/smoothie/infra"
 )
 
+func New() Runner {
+	cnf, err := parseConfig()
+	if err != nil {
+		return &Help{
+			err: err,
+		}
+	}
+
+	return &Continue{
+		cnf:       cnf,
+		presenter: newPresenter(cnf.mode, cnf.format),
+	}
+}
+
 type Runner interface {
 	Run() error
 }
