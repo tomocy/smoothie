@@ -112,13 +112,7 @@ func (t *Twitter) saveAccessCredentials(cred *oauth.Credentials) error {
 }
 
 func (t *Twitter) saveConfig(cnf twitterConfig) error {
-	loaded, err := loadConfig()
-	if err != nil {
-		return saveConfig(config{
-			Twitter: cnf,
-		})
-	}
-
+	loaded, _ := loadConfig()
 	loaded.Twitter = cnf
 	return saveConfig(loaded)
 }
