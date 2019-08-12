@@ -28,6 +28,17 @@ type Continue struct {
 	presenter presenter
 }
 
+func (c *Continue) fetchAndShowPostsOfDrivers() error {
+	ps, err := c.fetchPostsOfDrivers()
+	if err != nil {
+		return err
+	}
+
+	c.presenter.ShowPosts(ps)
+
+	return nil
+}
+
 func (c *Continue) fetchPostsOfDrivers() (domain.Posts, error) {
 	u := newPostUsecase()
 	return u.FetchPostsOfDrivers(c.cnf.drivers...)
