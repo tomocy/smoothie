@@ -1,6 +1,10 @@
 package runner
 
-import "flag"
+import (
+	"flag"
+
+	"github.com/tomocy/smoothie/domain"
+)
 
 type Runner interface {
 	Run() error
@@ -19,6 +23,10 @@ type config struct {
 
 type Continue struct {
 	cnf config
+}
+
+type presenter interface {
+	ShowPosts(domain.Posts)
 }
 
 type Help struct {
