@@ -26,6 +26,8 @@ type config struct {
 
 const (
 	modeCLI = "cli"
+
+	formatText = "text"
 )
 
 type presenter interface {
