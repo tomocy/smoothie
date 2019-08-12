@@ -46,3 +46,9 @@ func (d *date) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+type User struct {
+	ID         string `json:"id_str"`
+	Name       string `json:"name"`
+	ScreenName string `json:"screen_name"`
+}
