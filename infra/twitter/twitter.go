@@ -31,7 +31,7 @@ func (t *Tweet) Adapt() *domain.Post {
 		text = t.FullText
 	}
 	return &domain.Post{
-		ID: t.ID, Driver: "twitter", Text: text, CreatedAt: time.Time(t.CreatedAt),
+		ID: t.ID, Driver: "twitter", User: t.User.Adapt(), Text: text, CreatedAt: time.Time(t.CreatedAt),
 	}
 }
 
