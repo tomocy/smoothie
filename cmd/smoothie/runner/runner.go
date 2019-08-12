@@ -24,3 +24,8 @@ type Continue struct {
 type Help struct {
 	err error
 }
+
+func (h *Help) Run() error {
+	flag.Usage()
+	return h.err
+}
