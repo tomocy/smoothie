@@ -22,7 +22,8 @@ type config struct {
 }
 
 type Continue struct {
-	cnf config
+	cnf       config
+	presenter presenter
 }
 
 const (
