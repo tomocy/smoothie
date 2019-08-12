@@ -1,9 +1,22 @@
 package infra
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
+
+func init() {
+	must(createWorkspace())
+}
+
+func must(errs ...error) {
+	for _, err := range errs {
+		if err != nil {
+			panic(fmt.Errorf("development error in infra: %s", err))
+		}
+	}
+}
 
 func createWorkspace() error {
 	name := configFilename()
