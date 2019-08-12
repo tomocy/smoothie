@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/tomocy/smoothie/infra/twitter"
@@ -79,4 +80,9 @@ func (t *Twitter) do(r oauthReq, dst interface{}) error {
 	defer resp.Body.Close()
 
 	return json.NewDecoder(resp.Body).Decode(dst)
+}
+
+func (t *Twitter) endpoint(ps ...string) string {
+	ss := append([]string{"https://api.twitter.com/1.1"}, ps...)
+	return filepath.Join(ss...)
 }
