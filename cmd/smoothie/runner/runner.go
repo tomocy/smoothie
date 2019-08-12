@@ -21,6 +21,7 @@ func parseConfig() (config, error) {
 }
 
 type config struct {
+	mode    string
 	drivers []string
 }
 
