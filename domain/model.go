@@ -5,12 +5,6 @@ import (
 	"time"
 )
 
-type User struct {
-	ID       string
-	Name     string
-	Username string
-}
-
 type Posts []*Post
 
 func (ps *Posts) SortByNewest() {
@@ -24,4 +18,10 @@ type Post struct {
 	Driver    string
 	Text      string
 	CreatedAt time.Time
+}
+
+type User struct {
+	ID       string
+	Name     string
+	Username string
 }
