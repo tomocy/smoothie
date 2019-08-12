@@ -33,7 +33,7 @@ func (d *date) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*d = date(parsed.In(time.Local))
+	*d = date(parsed.Local())
 
 	return nil
 }
