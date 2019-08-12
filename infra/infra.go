@@ -2,8 +2,11 @@ package infra
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
+
+	"github.com/garyburd/go-oauth/oauth"
 )
 
 func init() {
@@ -46,4 +49,10 @@ func configFilename() string {
 
 func workspaceName() string {
 	return filepath.Join(os.Getenv("HOME"), ".smoothie")
+}
+
+type oauthReq struct {
+	cred        *oauth.Credentials
+	method, url string
+	params      url.Values
 }
