@@ -44,14 +44,6 @@ func createWorkspace() error {
 	return f.Close()
 }
 
-func configFilename() string {
-	return filepath.Join(workspaceName(), "config.json")
-}
-
-func workspaceName() string {
-	return filepath.Join(os.Getenv("HOME"), ".smoothie")
-}
-
 type oauthReq struct {
 	cred        *oauth.Credentials
 	method, url string
@@ -72,4 +64,12 @@ type config struct {
 
 type twitterConfig struct {
 	AccessCredentials *oauth.Credentials `json:"access_credentials"`
+}
+
+func configFilename() string {
+	return filepath.Join(workspaceName(), "config.json")
+}
+
+func workspaceName() string {
+	return filepath.Join(os.Getenv("HOME"), ".smoothie")
 }
