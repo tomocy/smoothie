@@ -2,6 +2,7 @@ package runner
 
 import (
 	"flag"
+	"io"
 
 	"github.com/tomocy/smoothie/app"
 	"github.com/tomocy/smoothie/domain"
@@ -29,6 +30,10 @@ const (
 
 type presenter interface {
 	ShowPosts(domain.Posts)
+}
+
+type printer interface {
+	PrintPosts(io.Writer, domain.Posts)
 }
 
 type Continue struct {
