@@ -69,6 +69,15 @@ func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
 	return t.requestClientAuthorization(temp)
 }
 
+func (t *Twitter) loadConfig() (twitterConfig, error) {
+	cnf, err := loadConfig()
+	if err != nil {
+		return twitterConfig{}, err
+	}
+
+	return cnf.Twitter, nil
+}
+
 func (t *Twitter) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Credentials, error) {
 	url := t.oauthClient.AuthorizationURL(temp, nil)
 	fmt.Println("open this url: ", url)
