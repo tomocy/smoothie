@@ -6,6 +6,8 @@ type User struct {
 	Drivers []string
 }
 
+type Posts []*Post
+
 type Post struct {
 	ID        string
 	Driver    string
