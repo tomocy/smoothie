@@ -14,11 +14,11 @@ type Runner interface {
 }
 
 func parseConfig() (config, error) {
-	m := flag.String("m", modeCLI, "name of mode")
+	m, f := flag.String("m", modeCLI, "name of mode"), flag.String("f", formatText, "format")
 	flag.Parse()
 
 	return config{
-		mode:    *m,
+		mode: *m, format: *f,
 		drivers: flag.Args(),
 	}, nil
 }
