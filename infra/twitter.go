@@ -105,6 +105,12 @@ func (t *Twitter) do(r oauthReq, dst interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
+func (t *Twitter) saveAccessCredentials(cred *oauth.Credentials) error {
+	loaded, _ := t.loadConfig()
+	loaded.AccessCredentials = cred
+	return t.saveConfig(loaded)
+}
+
 func (t *Twitter) saveConfig(cnf twitterConfig) error {
 	loaded, err := loadConfig()
 	if err != nil {
