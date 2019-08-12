@@ -56,6 +56,9 @@ func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, er
 	}, &ts); err != nil {
 		return nil, err
 	}
+	if err := t.saveAccessCredentials(cred); err != nil {
+		return nil, err
+	}
 
 	return ts, nil
 }
