@@ -23,6 +23,14 @@ type config struct {
 	drivers []string
 }
 
+const (
+	modeCLI = "cli"
+)
+
+type presenter interface {
+	ShowPosts(domain.Posts)
+}
+
 type Continue struct {
 	cnf       config
 	presenter presenter
@@ -46,14 +54,6 @@ func (c *Continue) fetchAndShowPostsOfDrivers() error {
 func (c *Continue) fetchPostsOfDrivers() (domain.Posts, error) {
 	u := newPostUsecase()
 	return u.FetchPostsOfDrivers(c.cnf.drivers...)
-}
-
-const (
-	modeCLI = "cli"
-)
-
-type presenter interface {
-	ShowPosts(domain.Posts)
 }
 
 type Help struct {
