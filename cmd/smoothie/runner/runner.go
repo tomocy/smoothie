@@ -28,6 +28,11 @@ type Continue struct {
 	presenter presenter
 }
 
+func (c *Continue) fetchPostsOfDrivers() (domain.Posts, error) {
+	u := newPostUsecase()
+	return u.FetchPostsOfDrivers(c.cnf.drivers...)
+}
+
 const (
 	modeCLI = "cli"
 )
