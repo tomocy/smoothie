@@ -105,6 +105,18 @@ func (t *Twitter) do(r oauthReq, dst interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
+func (t *Twitter) saveConfig(cnf twitterConfig) error {
+	loaded, err := loadConfig()
+	if err != nil {
+		return saveConfig(config{
+			Twitter: cnf,
+		})
+	}
+
+	loaded.Twitter = cnf
+	return saveConfig(loaded)
+}
+
 func (t *Twitter) endpoint(ps ...string) string {
 	parsed, _ := url.Parse("https://api.twitter.com/1.1")
 	ss := append([]string{parsed.Path}, ps...)
