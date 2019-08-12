@@ -3,6 +3,7 @@ package runner
 import (
 	"flag"
 	"io"
+	"sort"
 
 	"github.com/tomocy/smoothie/app"
 	"github.com/tomocy/smoothie/domain"
@@ -99,6 +100,16 @@ func (c *Continue) fetchAndShowPostsOfDrivers() error {
 func (c *Continue) fetchPostsOfDrivers() (domain.Posts, error) {
 	u := newPostUsecase()
 	return u.FetchPostsOfDrivers(c.cnf.drivers...)
+}
+
+func orderPostsByOldest(ps domain.Posts) domain.Posts {
+	ordered := make(domain.Posts, len(ps))
+	copy(ordered, ps)
+	sort.Slice(ordered, func(i, j int) bool {
+		return ordered[i].CreatedAt.Before(ordered[j].CreatedAt)
+	})
+
+	return ordered
 }
 
 type Help struct {
