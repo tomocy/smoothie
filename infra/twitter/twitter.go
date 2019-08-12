@@ -1,6 +1,10 @@
 package twitter
 
-import "time"
+import (
+	"time"
+
+	"github.com/tomocy/smoothie/domain"
+)
 
 type Tweets []*Tweet
 
@@ -9,6 +13,16 @@ type Tweet struct {
 	Text      string `json:"text"`
 	FullText  string `json:"full_text"`
 	CreatedAt date   `json:"created_at"`
+}
+
+func (t *Tweet) Adapt() *domain.Post {
+	text := t.Text
+	if t.FullText != "" {
+		text = t.FullText
+	}
+	return &domain.Post{
+		ID: t.ID, Driver: "twitter", Text: text, CreatedAt: time.Time(t.CreatedAt),
+	}
 }
 
 type date time.Time
