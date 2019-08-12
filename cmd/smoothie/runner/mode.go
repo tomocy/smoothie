@@ -11,5 +11,6 @@ type cli struct {
 }
 
 func (c *cli) ShowPosts(ps domain.Posts) {
-	c.printer.PrintPosts(os.Stdout, ps)
+	ordered := orderPostsByOldest(ps)
+	c.printer.PrintPosts(os.Stdout, ordered)
 }
