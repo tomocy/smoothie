@@ -58,18 +58,10 @@ type oauthReq struct {
 	params      url.Values
 }
 
-func (r *oauthReq) do() (*http.Response, error) {
+func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
 	if r.method != http.MethodGet {
-		return http.PostForm(r.url, r.params)
+		return client.Post(http.DefaultClient, r.cred, r.url, r.params)
 	}
 
-	parsed, err := url.Parse(r.url)
-	if err != nil {
-		return nil, err
-	}
-	if r.params != nil {
-		parsed.RawQuery = r.params.Encode()
-	}
-
-	return http.Get(parsed.String())
+	return client.Get(http.DefaultClient, r.cred, r.url, r.params)
 }
