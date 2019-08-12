@@ -93,6 +93,8 @@ func (t *Twitter) do(r oauthReq, dst interface{}) error {
 }
 
 func (t *Twitter) endpoint(ps ...string) string {
-	ss := append([]string{"https://api.twitter.com/1.1"}, ps...)
-	return filepath.Join(ss...)
+	parsed, _ := url.Parse("https://api.twitter.com/1.1")
+	ss := append([]string{parsed.Path}, ps...)
+	parsed.Path = filepath.Join(ss...)
+	return parsed.String()
 }
