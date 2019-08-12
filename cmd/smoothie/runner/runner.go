@@ -25,6 +25,10 @@ type Continue struct {
 	cnf config
 }
 
+const (
+	modeCLI = "cli"
+)
+
 type presenter interface {
 	ShowPosts(domain.Posts)
 }
