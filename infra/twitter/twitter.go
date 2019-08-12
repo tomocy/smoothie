@@ -19,6 +19,7 @@ func (ts Tweets) Adapt() domain.Posts {
 
 type Tweet struct {
 	ID        string `json:"id_str"`
+	User      *User  `json:"user"`
 	Text      string `json:"text"`
 	FullText  string `json:"full_text"`
 	CreatedAt date   `json:"created_at"`
