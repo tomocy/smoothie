@@ -61,6 +61,10 @@ func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, er
 }
 
 func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
+	if cnf, err := t.loadConfig(); err == nil {
+		return cnf.AccessCredentials, nil
+	}
+
 	temp, err := t.oauthClient.RequestTemporaryCredentials(http.DefaultClient, "", nil)
 	if err != nil {
 		return nil, err
