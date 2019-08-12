@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/garyburd/go-oauth/oauth"
+	"github.com/tomocy/smoothie/infra/twitter"
 )
 
 func NewTwitter(id, secret string) *Twitter {
@@ -24,6 +26,27 @@ func NewTwitter(id, secret string) *Twitter {
 
 type Twitter struct {
 	oauthClient oauth.Client
+}
+
+func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, error) {
+	cred, err := t.retreiveAuthorization()
+	if err != nil {
+		return nil, err
+	}
+
+	assured := params
+	if assured == nil {
+		assured = make(url.Values)
+	}
+	assured.Set("tweet_mode", "extended")
+	var ts twitter.Tweets
+	if err := t.do(oauthReq{
+		cred: cred, method: http.MethodGet, url: dst, params: assured,
+	}, &ts); err != nil {
+		return nil, err
+	}
+
+	return ts, nil
 }
 
 func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
