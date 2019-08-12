@@ -34,6 +34,15 @@ type presenter interface {
 	ShowPosts(domain.Posts)
 }
 
+func newPrinter(format string) printer {
+	switch format {
+	case formatText:
+		return new(text)
+	default:
+		return nil
+	}
+}
+
 type printer interface {
 	PrintPosts(io.Writer, domain.Posts)
 }
