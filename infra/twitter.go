@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/tomocy/deverr"
-
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/twitter"
@@ -34,14 +32,15 @@ type Twitter struct {
 	oauthClient oauth.Client
 }
 
-func (t *Twitter) StreamPosts(context.Context) (<-chan domain.Posts, <-chan error) {
-	errCh := make(chan error)
+func (t *Twitter) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+	tsCh, errCh := t.streamTweets(ctx, t.endpoint("/statuses/home_timeline.json"), nil)
+	psCh := make(chan domain.Posts)
 	go func() {
-		defer close(errCh)
-		errCh <- deverr.NotImplemented
+		defer close(psCh)
+		psCh <- (<-tsCh).Adapt()
 	}()
 
-	return nil, errCh
+	return psCh, errCh
 }
 
 func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Values) (<-chan twitter.Tweets, <-chan error) {
