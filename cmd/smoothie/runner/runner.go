@@ -40,6 +40,7 @@ func parseConfig() (config, error) {
 
 type config struct {
 	mode, format string
+	isStreaming  bool
 	drivers      []string
 }
 
