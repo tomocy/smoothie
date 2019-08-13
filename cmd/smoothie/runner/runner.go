@@ -30,11 +30,13 @@ type Runner interface {
 
 func parseConfig() (config, error) {
 	m, f := flag.String("m", modeCLI, "name of mode"), flag.String("f", formatText, "format")
+	s := flag.Bool("s", false, "enable streaming")
 	flag.Parse()
 
 	return config{
 		mode: *m, format: *f,
-		drivers: flag.Args(),
+		isStreaming: *s,
+		drivers:     flag.Args(),
 	}, nil
 }
 
