@@ -94,7 +94,7 @@ func (c *Continue) Run() error {
 		return c.streamAndShowPostsOfDrivers()
 	}
 
-	return c.fetchAndShowPostsOfDrivers()
+	return c.fetchPostsOfDrivers()
 }
 
 func (c *Continue) streamAndShowPostsOfDrivers() error {
@@ -128,8 +128,9 @@ func (c *Continue) streamPostsOfDrivers() (<-chan domain.Posts, <-chan error) {
 	return u.StreamPostsOfDrivers(ctx, c.cnf.drivers...)
 }
 
-func (c *Continue) fetchAndShowPostsOfDrivers() error {
-	ps, err := c.fetchPostsOfDrivers()
+func (c *Continue) fetchPostsOfDrivers() error {
+	u := newPostUsecase()
+	ps, err := u.FetchPostsOfDrivers(c.cnf.drivers...)
 	if err != nil {
 		return err
 	}
@@ -137,11 +138,6 @@ func (c *Continue) fetchAndShowPostsOfDrivers() error {
 	c.presenter.ShowPosts(ps)
 
 	return nil
-}
-
-func (c *Continue) fetchPostsOfDrivers() (domain.Posts, error) {
-	u := newPostUsecase()
-	return u.FetchPostsOfDrivers(c.cnf.drivers...)
 }
 
 func orderPostsByOldest(ps domain.Posts) domain.Posts {
