@@ -116,6 +116,7 @@ func (c *Continue) streamPostsOfDrivers() (<-chan domain.Posts, <-chan error) {
 			select {
 			case <-sigCh:
 				cancelFn()
+				return
 			}
 		}
 	}()
