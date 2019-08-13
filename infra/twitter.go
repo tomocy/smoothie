@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"github.com/tomocy/deverr"
 
@@ -41,6 +42,47 @@ func (t *Twitter) StreamPosts(context.Context) (<-chan domain.Posts, <-chan erro
 	}()
 
 	return nil, errCh
+}
+
+func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Values) (<-chan twitter.Tweets, <-chan error) {
+	tsCh, errCh := make(chan twitter.Tweets), make(chan error)
+	go func() {
+		defer func() {
+			close(tsCh)
+			close(errCh)
+		}()
+		lastID := t.fetchAndSendTweets(dst, params, tsCh, errCh)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(4 * time.Minute):
+				if lastID != "" {
+					if params == nil {
+						params = make(url.Values)
+					}
+					params.Set("since_id", lastID)
+				}
+				lastID = t.fetchAndSendTweets(dst, params, tsCh, errCh)
+			}
+		}
+	}()
+
+	return tsCh, errCh
+}
+
+func (t *Twitter) fetchAndSendTweets(dst string, params url.Values, tsCh chan<- twitter.Tweets, errCh chan<- error) string {
+	ts, err := t.fetchTweets(dst, params)
+	if err != nil {
+		errCh <- err
+		return ""
+	}
+	if len(ts) <= 0 {
+		return ""
+	}
+
+	tsCh <- ts
+	return ts[0].ID
 }
 
 func (t *Twitter) FetchPosts() (domain.Posts, error) {
