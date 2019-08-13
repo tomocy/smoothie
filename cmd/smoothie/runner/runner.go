@@ -93,6 +93,18 @@ func (c *Continue) Run() error {
 	return c.fetchAndShowPostsOfDrivers()
 }
 
+func (c *Continue) streamAndShowPostsOfDrivers() error {
+	psCh, errCh := c.streamPostsOfDrivers()
+	for {
+		select {
+		case ps := <-psCh:
+			c.presenter.ShowPosts(ps)
+		case err := <-errCh:
+			return err
+		}
+	}
+}
+
 func (c *Continue) streamPostsOfDrivers() (<-chan domain.Posts, <-chan error) {
 	u := newPostUsecase()
 	ctx, cancelFn := context.WithCancel(context.Background())
