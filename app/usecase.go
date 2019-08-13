@@ -1,7 +1,9 @@
 package app
 
 import (
+	"context"
 	"fmt"
+	"sync"
 
 	"github.com/tomocy/smoothie/domain"
 )
@@ -14,6 +16,76 @@ func NewPostUsecase(repos map[string]domain.PostRepo) *PostUsecase {
 
 type PostUsecase struct {
 	repos map[string]domain.PostRepo
+}
+
+func (u *PostUsecase) StreamPostsOfDrivers(ctx context.Context, ds ...string) (<-chan domain.Posts, <-chan error) {
+	psChs, errChs := make([]<-chan domain.Posts, len(ds)), make([]<-chan error, len(ds))
+	for i, d := range ds {
+		psChs[i], errChs[i] = u.streamPosts(ctx, d)
+	}
+
+	return u.fanInPosts(psChs...), u.fanInErrors(errChs...)
+}
+
+func (u *PostUsecase) streamPosts(ctx context.Context, d string) (<-chan domain.Posts, <-chan error) {
+	repo, ok := u.repos[d]
+	if !ok {
+		psCh, errCh := make(chan domain.Post), make(chan error)
+		go func() {
+			defer func() {
+				close(psCh)
+				close(errCh)
+			}()
+			errCh <- fmt.Errorf("unknown driver: %s", d)
+		}()
+		return nil, errCh
+	}
+
+	return repo.StreamPosts(ctx)
+}
+
+func (u *PostUsecase) fanInPosts(chs ...<-chan domain.Posts) <-chan domain.Posts {
+	fannedInCh := make(chan domain.Posts)
+	go func() {
+		defer close(fannedInCh)
+		var wg sync.WaitGroup
+		var fannedIn domain.Posts
+		for _, ch := range chs {
+			wg.Add(1)
+			go func(ch <-chan domain.Posts) {
+				defer wg.Done()
+				for ps := range ch {
+					fannedIn = append(fannedIn, ps...)
+				}
+			}(ch)
+		}
+		wg.Wait()
+
+		fannedIn.SortByNewest()
+		fannedInCh <- fannedIn
+	}()
+
+	return fannedInCh
+}
+
+func (u *PostUsecase) fanInErrors(chs ...<-chan error) <-chan error {
+	fannedInCh := make(chan error)
+	go func() {
+		defer close(fannedInCh)
+		var wg sync.WaitGroup
+		for _, ch := range chs {
+			wg.Add(1)
+			go func(ch <-chan error) {
+				defer wg.Done()
+				for err := range ch {
+					fannedInCh <- err
+				}
+			}(ch)
+		}
+		wg.Wait()
+	}()
+
+	return fannedInCh
 }
 
 func (u *PostUsecase) FetchPostsOfDrivers(ds ...string) (domain.Posts, error) {

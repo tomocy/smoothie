@@ -6,9 +6,42 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
 )
+
+func TestStremPostsOfDrivers(t *testing.T) {
+	expectedDate := time.Date(2019, 8, 13, 0, 0, 0, 0, time.Local)
+	expecteds := domain.Posts{
+		{ID: "1", Driver: "a", Text: "one", CreatedAt: expectedDate.Add(2 * time.Hour)},
+		{ID: "1", Driver: "b", Text: "one", CreatedAt: expectedDate.Add(2 * time.Hour)},
+		{ID: "2", Driver: "a", Text: "two", CreatedAt: expectedDate.Add(1 * time.Hour)},
+		{ID: "2", Driver: "b", Text: "two", CreatedAt: expectedDate.Add(1 * time.Hour)},
+	}
+	u := newMockPostUsecase()
+	ctx, cancelFn := context.WithCancel(context.Background())
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, "a", "b")
+	var actuals domain.Posts
+waiting:
+	for {
+		select {
+		case <-time.After(600 * time.Millisecond):
+			cancelFn()
+		case ps, ok := <-psCh:
+			if !ok {
+				cancelFn()
+				break waiting
+			}
+			actuals = append(actuals, ps...)
+		case err := <-errCh:
+			if err != nil {
+				t.Errorf("unexpected error by (*PostUsecase).StreamPosts: got %s, expect <nil>", err)
+			}
+		}
+	}
+	if err := assertPosts(actuals, expecteds); err != nil {
+		t.Errorf("unexpected posts by (*PostUsecase).StreamPosts: %s\n", err)
+	}
+}
 
 func TestFetchPostsOfDrivers(t *testing.T) {
 	expectedDate := time.Date(2019, 8, 13, 0, 0, 0, 0, time.Local)
@@ -54,14 +87,29 @@ type mock struct {
 	ps domain.Posts
 }
 
-func (m *mock) StreamPosts(context.Context) (<-chan domain.Posts, <-chan error) {
-	errCh := make(chan error)
+func (m *mock) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+	psCh, errCh := make(chan domain.Posts), make(chan error)
 	go func() {
-		defer close(errCh)
-		errCh <- deverr.NotImplemented
+		defer func() {
+			close(psCh)
+			close(errCh)
+		}()
+		if len(m.ps) <= 0 {
+			return
+		}
+
+		psCh <- domain.Posts{m.ps[0]}
+		for _, p := range m.ps[1:] {
+			select {
+			case <-ctx.Done():
+				break
+			case <-time.Tick(500 * time.Millisecond):
+				psCh <- domain.Posts{p}
+			}
+		}
 	}()
 
-	return nil, errCh
+	return psCh, errCh
 }
 
 func (m *mock) FetchPosts() (domain.Posts, error) {
