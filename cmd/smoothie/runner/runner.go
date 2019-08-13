@@ -1,9 +1,13 @@
 package runner
 
 import (
+	"context"
 	"flag"
 	"io"
+	"os"
+	"os/signal"
 	"sort"
+	"syscall"
 
 	"github.com/tomocy/smoothie/app"
 	"github.com/tomocy/smoothie/domain"
@@ -87,6 +91,24 @@ type Continue struct {
 
 func (c *Continue) Run() error {
 	return c.fetchAndShowPostsOfDrivers()
+}
+
+func (c *Continue) streamPostsOfDrivers() (<-chan domain.Posts, <-chan error) {
+	u := newPostUsecase()
+	ctx, cancelFn := context.WithCancel(context.Background())
+	sigCh := make(chan os.Signal)
+	signal.Notify(sigCh, syscall.SIGINT)
+	go func() {
+		defer close(sigCh)
+		for {
+			select {
+			case <-sigCh:
+				cancelFn()
+			}
+		}
+	}()
+
+	return u.StreamPostsOfDrivers(ctx, c.cnf.drivers...)
 }
 
 func (c *Continue) fetchAndShowPostsOfDrivers() error {
