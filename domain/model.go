@@ -9,7 +9,12 @@ type Posts []*Post
 
 func (ps *Posts) SortByNewest() {
 	sort.Slice(*ps, func(i, j int) bool {
-		return (*ps)[i].CreatedAt.After((*ps)[j].CreatedAt)
+		pI, pJ := (*ps)[i], (*ps)[j]
+		if pI.CreatedAt.Equal(pJ.CreatedAt) {
+			return pI.Driver < pJ.Driver
+		}
+
+		return pI.CreatedAt.After(pJ.CreatedAt)
 	})
 }
 
