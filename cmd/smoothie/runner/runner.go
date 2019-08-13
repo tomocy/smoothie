@@ -90,6 +90,10 @@ type Continue struct {
 }
 
 func (c *Continue) Run() error {
+	if c.cnf.isStreaming {
+		return c.streamAndShowPostsOfDrivers()
+	}
+
 	return c.fetchAndShowPostsOfDrivers()
 }
 
