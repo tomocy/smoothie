@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"io"
 	"os"
@@ -91,41 +92,31 @@ type Continue struct {
 
 func (c *Continue) Run() error {
 	if c.cnf.isStreaming {
-		return c.streamAndShowPostsOfDrivers()
+		return c.streamPostsOfDrivers()
 	}
 
 	return c.fetchPostsOfDrivers()
 }
 
-func (c *Continue) streamAndShowPostsOfDrivers() error {
-	psCh, errCh := c.streamPostsOfDrivers()
+func (c *Continue) streamPostsOfDrivers() error {
+	u := newPostUsecase()
+	ctx, cancelFn := context.WithCancel(context.Background())
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, c.cnf.drivers...)
+	sigCh := make(chan os.Signal)
+	defer close(sigCh)
+	signal.Notify(sigCh, syscall.SIGINT)
 	for {
 		select {
 		case ps := <-psCh:
 			c.presenter.ShowPosts(ps)
 		case err := <-errCh:
+			cancelFn()
 			return err
+		case sig := <-sigCh:
+			cancelFn()
+			return errors.New(sig.String())
 		}
 	}
-}
-
-func (c *Continue) streamPostsOfDrivers() (<-chan domain.Posts, <-chan error) {
-	u := newPostUsecase()
-	ctx, cancelFn := context.WithCancel(context.Background())
-	sigCh := make(chan os.Signal)
-	signal.Notify(sigCh, syscall.SIGINT)
-	go func() {
-		defer close(sigCh)
-		for {
-			select {
-			case <-sigCh:
-				cancelFn()
-				return
-			}
-		}
-	}()
-
-	return u.StreamPostsOfDrivers(ctx, c.cnf.drivers...)
 }
 
 func (c *Continue) fetchPostsOfDrivers() error {
