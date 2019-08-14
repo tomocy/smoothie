@@ -55,9 +55,9 @@ func (r *Reddit) loadConfig() (redditConfig, error) {
 	return cnf.Reddit, nil
 }
 
-func (r *Reddit) authCodeURL(params ...oauth2.AuthCodeOption) string {
+func (r *Reddit) authCodeURL() string {
 	r.setRandomState()
-	return r.oauth.cnf.AuthCodeURL(r.oauth.state, params...)
+	return r.oauth.cnf.AuthCodeURL(r.oauth.state, oauth2.SetAuthURLParam("duration", "permanent"))
 }
 
 func (r *Reddit) setRandomState() {
