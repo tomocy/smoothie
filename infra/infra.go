@@ -1,7 +1,9 @@
 package infra
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -63,6 +65,59 @@ func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
 type oauth2Config struct {
 	state string
 	cnf   oauth2.Config
+}
+
+func (c *oauth2Config) handleRedirect(ctx context.Context, params []oauth2.AuthCodeOption, path string) (*oauth2.Token, error) {
+	tokCh, errCh := make(chan *oauth2.Token), make(chan error)
+	go func() {
+		defer func() {
+			close(tokCh)
+			close(errCh)
+		}()
+
+		http.Handle(path, c.handlerForRedirect(ctx, params, tokCh, errCh))
+		if err := http.ListenAndServe(":80", nil); err != nil {
+			errCh <- err
+		}
+	}()
+
+	select {
+	case tok := <-tokCh:
+		return tok, nil
+	case err := <-errCh:
+		return nil, err
+	}
+}
+
+func (c *oauth2Config) handlerForRedirect(ctx context.Context, params []oauth2.AuthCodeOption, tokCh chan<- *oauth2.Token, errCh chan<- errCh) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		state, code := q.Get("state"), q.Get("code")
+		if err := c.checkState(); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			errCh <- err
+			return
+		}
+
+		tok, err := c.cnf.Exchange(ctx, code, params...)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			errCh <- err
+			return
+		}
+
+		tokCh <- tok
+	})
+}
+
+func (c *oauth2Config) checkState() error {
+	stored := c.state
+	c.state = ""
+	if state != stored {
+		return errors.New("invalid state")
+	}
+
+	return nil
 }
 
 func loadConfig() (config, error) {
