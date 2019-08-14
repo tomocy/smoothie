@@ -48,26 +48,28 @@ func (u *PostUsecase) fanInPosts(ctx context.Context, chs ...<-chan domain.Posts
 	fannedInCh := make(chan domain.Posts)
 	go func() {
 		defer close(fannedInCh)
-		var wg sync.WaitGroup
-		var fannedIn domain.Posts
-		for _, ch := range chs {
-			wg.Add(1)
-			go func(ch <-chan domain.Posts) {
-				defer wg.Done()
-				for ps := range ch {
-					select {
-					case <-ctx.Done():
+		for {
+			var wg sync.WaitGroup
+			var fannedIn domain.Posts
+			for _, ch := range chs {
+				wg.Add(1)
+				go func(ch <-chan domain.Posts) {
+					defer wg.Done()
+					for ps := range ch {
+						select {
+						case <-ctx.Done():
+						default:
+							fannedIn = append(fannedIn, ps...)
+						}
 						return
-					default:
-						fannedIn = append(fannedIn, ps...)
 					}
-				}
-			}(ch)
-		}
-		wg.Wait()
+				}(ch)
+			}
+			wg.Wait()
 
-		fannedIn.SortByNewest()
-		fannedInCh <- fannedIn
+			fannedIn.SortByNewest()
+			fannedInCh <- fannedIn
+		}
 	}()
 
 	return fannedInCh
