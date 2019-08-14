@@ -8,13 +8,16 @@ import (
 	"github.com/tomocy/tago"
 )
 
-type text struct{}
+type text struct {
+	printed bool
+}
 
 func (t *text) PrintPosts(w io.Writer, ps domain.Posts) {
 	vl := "----------"
-	for i, p := range ps {
-		if i == 0 {
+	for _, p := range ps {
+		if !t.printed {
 			fmt.Fprintln(w, vl)
+			t.printed = true
 		}
 		t.printPost(w, p)
 		fmt.Fprintln(w, vl)
