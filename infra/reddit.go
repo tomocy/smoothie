@@ -9,12 +9,22 @@ import (
 	"net/url"
 	"path/filepath"
 
+	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/reddit"
 	"golang.org/x/oauth2"
 )
 
 type Reddit struct {
 	oauth oauth2Config
+}
+
+func (r *Reddit) FetchPosts() (domain.Posts, error) {
+	ps, err := r.fetchPosts(r.endpoint("/new"), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return ps.Adapt(), nil
 }
 
 func (r *Reddit) fetchPosts(dst string, params url.Values) (reddit.Posts, error) {
