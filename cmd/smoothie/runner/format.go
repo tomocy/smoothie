@@ -28,5 +28,5 @@ func (t *text) printPost(w io.Writer, p *domain.Post) {
 	if p.User.Username != "" {
 		fmt.Fprintf(w, " @%s", p.User.Username)
 	}
-	fmt.Fprintf(w, " %s\n%s\n", p.CreatedAt.Format("2006/01/02"), p.Text)
+	fmt.Fprintf(w, " %s\n%s\n", p.CreatedAt.Format("2006/01/02 15:04"), p.Text)
 }
