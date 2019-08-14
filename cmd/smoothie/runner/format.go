@@ -27,7 +27,7 @@ func (t *text) PrintPosts(w io.Writer, ps domain.Posts) {
 func (t *text) printPost(w io.Writer, p *domain.Post) {
 	without := tago.NewWithout(tago.DefaultDuration, "2006/01/02")
 	fmt.Fprintf(
-		w, "(%s) %s %s %s\n%s\n",
+		w, "(%s) %s @%s %s\n%s\n",
 		p.Driver, p.User.Name, p.User.Username, without.Ago(p.CreatedAt), p.Text,
 	)
 }
