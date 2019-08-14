@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -48,4 +49,14 @@ func (r *Reddit) authCodeURL(params ...oauth2.AuthCodeOption) string {
 
 func (r *Reddit) setRandomState() {
 	r.oauth.state = fmt.Sprintf("%d", rand.Intn(10000))
+}
+
+func (r *Reddit) do(req oauth2Req, dst interface{}) error {
+	resp, err := req.do(oauth2.NoContext, r.oauth.cnf)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return json.NewDecoder(resp.Body).Decode(dst)
 }
