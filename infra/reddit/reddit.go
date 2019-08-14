@@ -12,6 +12,15 @@ import (
 
 type Posts []*Post
 
+func (ps Posts) Adapt() domain.Posts {
+	adapteds := make(domain.Posts, len(ps))
+	for i, p := range ps {
+		adapteds[i] = p.Adapt()
+	}
+
+	return adapteds
+}
+
 type Post struct {
 	Name                  string        `json:"name"`
 	SubredditNamePrefixed string        `json:"subreddit_name_prefixed"`
