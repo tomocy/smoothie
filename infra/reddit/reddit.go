@@ -38,7 +38,8 @@ type Post struct {
 
 func (p *Post) Adapt() *domain.Post {
 	return &domain.Post{
-		ID: p.Name,
+		ID:     p.Name,
+		Driver: "reddit",
 		User: &domain.User{
 			Name: p.Author,
 		},
