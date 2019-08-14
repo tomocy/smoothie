@@ -108,15 +108,11 @@ func (r *Reddit) setRandomState() {
 }
 
 func (r *Reddit) handleAuthorizationRedirect() (*oauth2.Token, error) {
-	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
-		Transport: new(withUserAgent),
-	})
-
-	return r.oauth.handleRedirect(ctx, nil, "/smoothie/reddit/authorization")
+	return r.oauth.handleRedirect(r.contextWithUserAgent(), nil, "/smoothie/reddit/authorization")
 }
 
 func (r *Reddit) do(req oauth2Req, dst interface{}) error {
-	resp, err := req.do(oauth2.NoContext, r.oauth.cnf)
+	resp, err := req.do(r.contextWithUserAgent(), r.oauth.cnf)
 	if err != nil {
 		return err
 	}
