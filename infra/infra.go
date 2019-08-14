@@ -68,6 +68,23 @@ type oauth2Req struct {
 	params      url.Values
 }
 
+func (r *oauth2Req) do(ctx context.Context, cnf oauth2.Config) (*http.Response, error) {
+	client := cnf.Client(ctx, r.tok)
+	if r.method != http.MethodGet {
+		return client.PostForm(r.url, r.params)
+	}
+
+	parsed, err := url.Parse(r.url)
+	if err != nil {
+		return nil, err
+	}
+	if r.params != nil {
+		parsed.RawQuery = r.params.Encode()
+	}
+
+	return client.Get(parsed.String())
+}
+
 type oauth2Config struct {
 	state string
 	cnf   oauth2.Config
