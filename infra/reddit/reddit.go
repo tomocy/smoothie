@@ -42,9 +42,19 @@ func (p *Post) Adapt() *domain.Post {
 		User: &domain.User{
 			Name: p.Author,
 		},
-		Text:      fmt.Sprintf("%s\n%s", p.SubredditNamePrefixed, p.SelfText),
+		Text:      p.joinText(),
 		CreatedAt: time.Time(p.CreatedUTC),
 	}
+}
+
+func (p *Post) joinText() string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "%s %s", p.SubredditNamePrefixed, p.Title)
+	if p.SelfText != "" {
+		fmt.Fprintf(&b, "\n\n%s", p.SelfText)
+	}
+
+	return b.String()
 }
 
 type unixTimestamp time.Time
