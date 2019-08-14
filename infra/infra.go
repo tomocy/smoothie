@@ -163,6 +163,10 @@ type twitterConfig struct {
 	AccessCredentials *oauth.Credentials `json:"access_credentials"`
 }
 
+type redditConfig struct {
+	AccessToken *oauth2.Token `json:"access_token"`
+}
+
 func configFilename() string {
 	return filepath.Join(workspaceName(), "config.json")
 }
