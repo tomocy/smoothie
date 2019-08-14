@@ -20,6 +20,15 @@ func (r *Reddit) retreiveAuthorization() (*oauth2.Token, error) {
 	return r.handleAuthorizationRedirect()
 }
 
+func (r *Reddit) loadConfig() (redditConfig, error) {
+	cnf, err := loadConfig()
+	if err != nil {
+		return redditConfig{}, err
+	}
+
+	return cnf.Reddit, nil
+}
+
 func (r *Reddit) handleAuthorizationRedirect() (*oauth2.Token, error) {
 	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
 		Transport: new(withUserAgent),
