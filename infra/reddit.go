@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -59,13 +60,13 @@ func (r *Reddit) FetchPosts() (domain.Posts, error) {
 	return ps.Adapt(), nil
 }
 
-func (r *Reddit) fetchPosts(dst string, params url.Values) (reddit.Posts, error) {
+func (r *Reddit) fetchPosts(dst string, params url.Values) (*reddit.Posts, error) {
 	tok, err := r.retreiveAuthorization()
 	if err != nil {
 		return nil, err
 	}
 
-	var ps reddit.Posts
+	var ps *reddit.Posts
 	if err := r.do(oauth2Req{
 		tok: tok, method: http.MethodGet, url: dst, params: params,
 	}, &ps); err != nil {
@@ -117,6 +118,10 @@ func (r *Reddit) do(req oauth2Req, dst interface{}) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if http.StatusBadRequest <= resp.StatusCode {
+		return errors.New(resp.Status)
+	}
 
 	return json.NewDecoder(resp.Body).Decode(dst)
 }

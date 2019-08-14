@@ -10,12 +10,18 @@ import (
 	"github.com/tomocy/smoothie/domain"
 )
 
-type Posts []*Post
+type Posts struct {
+	Data struct {
+		Children []*struct {
+			Data Post `json:"data"`
+		} `json:"children"`
+	} `json:"data"`
+}
 
-func (ps Posts) Adapt() domain.Posts {
-	adapteds := make(domain.Posts, len(ps))
-	for i, p := range ps {
-		adapteds[i] = p.Adapt()
+func (ps Posts) Adapt() []*domain.Post {
+	adapteds := make([]*domain.Post, len(ps.Data.Children))
+	for i, p := range ps.Data.Children {
+		adapteds[i] = p.Data.Adapt()
 	}
 
 	return adapteds
