@@ -24,8 +24,9 @@ func (t *text) PrintPosts(w io.Writer, ps domain.Posts) {
 }
 
 func (t *text) printPost(w io.Writer, p *domain.Post) {
-	fmt.Fprintf(
-		w, "(%s) %s @%s %s\n%s\n",
-		p.Driver, p.User.Name, p.User.Username, p.CreatedAt.Format("2006/01/02"), p.Text,
-	)
+	fmt.Fprintf(w, "(%s) %s", p.Driver, p.User.Name)
+	if p.User.Username != "" {
+		fmt.Fprintf(w, " @%s", p.User.Username)
+	}
+	fmt.Fprintf(w, " %s\n%s\n", p.CreatedAt.Format("2006/01/02"), p.Text)
 }
