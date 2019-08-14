@@ -28,6 +28,9 @@ func (r *Reddit) fetchPosts(dst string, params url.Values) (reddit.Posts, error)
 	}, &ps); err != nil {
 		return nil, err
 	}
+	if err := r.saveAccessToken(tok); err != nil {
+		return nil, err
+	}
 
 	return ps, nil
 }
