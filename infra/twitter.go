@@ -119,11 +119,7 @@ func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, er
 		return nil, err
 	}
 
-	assured := params
-	if assured == nil {
-		assured = make(url.Values)
-	}
-	assured.Set("tweet_mode", "extended")
+	assured := t.assureDefaultParams(params)
 	var ts twitter.Tweets
 	if err := t.do(oauthReq{
 		cred: cred, method: http.MethodGet, url: dst, params: assured,
@@ -170,6 +166,17 @@ func (t *Twitter) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Cr
 	token, _, err := t.oauthClient.RequestToken(http.DefaultClient, temp, pin)
 
 	return token, err
+}
+
+func (t *Twitter) assureDefaultParams(params url.Values) url.Values {
+	assured := params
+	if assured == nil {
+		assured = make(url.Values)
+	}
+	assured.Set("count", "200")
+	assured.Set("tweet_mode", "extended")
+
+	return assured
 }
 
 func (t *Twitter) do(r oauthReq, dst interface{}) error {
