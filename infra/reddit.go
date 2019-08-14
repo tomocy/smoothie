@@ -52,14 +52,6 @@ func (r *Reddit) loadConfig() (redditConfig, error) {
 	return cnf.Reddit, nil
 }
 
-func (r *Reddit) handleAuthorizationRedirect() (*oauth2.Token, error) {
-	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
-		Transport: new(withUserAgent),
-	})
-
-	return r.oauth.handleRedirect(ctx, nil, "/smoothie/reddit/authorization")
-}
-
 func (r *Reddit) authCodeURL(params ...oauth2.AuthCodeOption) string {
 	r.setRandomState()
 	return r.oauth.cnf.AuthCodeURL(r.oauth.state, params...)
@@ -67,6 +59,14 @@ func (r *Reddit) authCodeURL(params ...oauth2.AuthCodeOption) string {
 
 func (r *Reddit) setRandomState() {
 	r.oauth.state = fmt.Sprintf("%d", rand.Intn(10000))
+}
+
+func (r *Reddit) handleAuthorizationRedirect() (*oauth2.Token, error) {
+	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
+		Transport: new(withUserAgent),
+	})
+
+	return r.oauth.handleRedirect(ctx, nil, "/smoothie/reddit/authorization")
 }
 
 func (r *Reddit) do(req oauth2Req, dst interface{}) error {
