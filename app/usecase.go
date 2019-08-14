@@ -24,7 +24,7 @@ func (u *PostUsecase) StreamPostsOfDrivers(ctx context.Context, ds ...string) (<
 		psChs[i], errChs[i] = u.streamPosts(ctx, d)
 	}
 
-	return u.fanInPosts(psChs...), u.fanInErrors(errChs...)
+	return u.fanInPosts(ctx, psChs...), u.fanInErrors(errChs...)
 }
 
 func (u *PostUsecase) streamPosts(ctx context.Context, d string) (<-chan domain.Posts, <-chan error) {
@@ -44,7 +44,7 @@ func (u *PostUsecase) streamPosts(ctx context.Context, d string) (<-chan domain.
 	return repo.StreamPosts(ctx)
 }
 
-func (u *PostUsecase) fanInPosts(chs ...<-chan domain.Posts) <-chan domain.Posts {
+func (u *PostUsecase) fanInPosts(ctx context.Context, chs ...<-chan domain.Posts) <-chan domain.Posts {
 	fannedInCh := make(chan domain.Posts)
 	go func() {
 		defer close(fannedInCh)
@@ -55,7 +55,12 @@ func (u *PostUsecase) fanInPosts(chs ...<-chan domain.Posts) <-chan domain.Posts
 			go func(ch <-chan domain.Posts) {
 				defer wg.Done()
 				for ps := range ch {
-					fannedIn = append(fannedIn, ps...)
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						fannedIn = append(fannedIn, ps...)
+					}
 				}
 			}(ch)
 		}
