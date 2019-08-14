@@ -9,13 +9,45 @@ import (
 	"net/url"
 	"path/filepath"
 
+	"github.com/tomocy/deverr"
+
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/reddit"
 	"golang.org/x/oauth2"
 )
 
+func NewReddit(id, secret string) *Reddit {
+	return &Reddit{
+		oauth: oauth2Config{
+			cnf: oauth2.Config{
+				ClientID:     id,
+				ClientSecret: secret,
+				RedirectURL:  "http://localhost/smoothie/reddit/authorization",
+				Endpoint: oauth2.Endpoint{
+					AuthURL:   "https://www.reddit.com/api/v1/authorize",
+					TokenURL:  "https://www.reddit.com/api/v1/access_token",
+					AuthStyle: oauth2.AuthStyleInHeader,
+				},
+				Scopes: []string{
+					"read", "identity", "mysubreddits",
+				},
+			},
+		},
+	}
+}
+
 type Reddit struct {
 	oauth oauth2Config
+}
+
+func (r *Reddit) StreamPosts(context.Context) (<-chan domain.Posts, <-chan error) {
+	errCh := make(chan error)
+	go func() {
+		close(errCh)
+		errCh <- deverr.NotImplemented
+	}()
+
+	return nil, errCh
 }
 
 func (r *Reddit) FetchPosts() (domain.Posts, error) {
