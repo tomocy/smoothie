@@ -67,8 +67,13 @@ func (u *PostUsecase) fanInPosts(ctx context.Context, chs ...<-chan domain.Posts
 			}
 			wg.Wait()
 
-			fannedIn.SortByNewest()
-			fannedInCh <- fannedIn
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				fannedIn.SortByNewest()
+				fannedInCh <- fannedIn
+			}
 		}
 	}()
 
