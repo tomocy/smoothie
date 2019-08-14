@@ -191,6 +191,14 @@ type redditConfig struct {
 	AccessToken *oauth2.Token `json:"access_token"`
 }
 
+func (c *redditConfig) isZero() bool {
+	if c.AccessToken != nil {
+		return false
+	}
+
+	return true
+}
+
 func configFilename() string {
 	return filepath.Join(workspaceName(), "config.json")
 }
