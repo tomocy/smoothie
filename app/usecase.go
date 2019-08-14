@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/tomocy/smoothie/domain"
 )
@@ -48,31 +49,39 @@ func (u *PostUsecase) fanInPosts(ctx context.Context, chs ...<-chan domain.Posts
 	fannedInCh := make(chan domain.Posts)
 	go func() {
 		defer close(fannedInCh)
-		for {
-			var wg sync.WaitGroup
+		fanIn := func(dst chan<- domain.Posts, srces []<-chan domain.Posts) bool {
 			var fannedIn domain.Posts
-			for _, ch := range chs {
-				wg.Add(1)
-				go func(ch <-chan domain.Posts) {
-					defer wg.Done()
-					for ps := range ch {
-						select {
-						case <-ctx.Done():
-						default:
-							fannedIn = append(fannedIn, ps...)
-						}
-						return
-					}
-				}(ch)
+			for _, src := range srces {
+				select {
+				case ps := <-src:
+					fannedIn = append(fannedIn, ps...)
+				default:
+				}
 			}
-			wg.Wait()
 
+			if len(fannedIn) <= 0 {
+				return false
+			}
+			fannedIn.SortByNewest()
+			dst <- fannedIn
+
+			return true
+		}
+	waiting:
+		for {
+			select {
+			case <-time.After(1 * time.Second):
+				if fanIn(fannedInCh, chs) {
+					break waiting
+				}
+			}
+		}
+		for {
 			select {
 			case <-ctx.Done():
 				return
-			default:
-				fannedIn.SortByNewest()
-				fannedInCh <- fannedIn
+			case <-time.After(1 * time.Minute):
+				fanIn(fannedInCh, chs)
 			}
 		}
 	}()
