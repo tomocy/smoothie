@@ -79,7 +79,7 @@ func (r *Reddit) fetchPosts(dst string, params url.Values) (reddit.Posts, error)
 }
 
 func (r *Reddit) retreiveAuthorization() (*oauth2.Token, error) {
-	if cnf, err := r.loadConfig(); err == nil {
+	if cnf, err := r.loadConfig(); err == nil && !cnf.isZero() {
 		return cnf.AccessToken, nil
 	}
 
