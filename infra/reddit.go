@@ -79,6 +79,16 @@ func (r *Reddit) do(req oauth2Req, dst interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
+func (r *Reddit) saveAccessToken(tok *oauth2.Token) error {
+	loaded, err := r.loadConfig()
+	if err != nil {
+		return err
+	}
+	loaded.AccessToken = tok
+
+	return r.saveConfig(loaded)
+}
+
 func (r *Reddit) saveConfig(cnf redditConfig) error {
 	loaded, err := loadConfig()
 	if err != nil {
