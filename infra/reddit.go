@@ -118,9 +118,10 @@ func (r *Reddit) fetchPosts(dst string, params url.Values) (*reddit.Posts, error
 		return nil, err
 	}
 
+	assured := r.assureDefaultParams(params)
 	var ps *reddit.Posts
 	if err := r.do(oauth2Req{
-		tok: tok, method: http.MethodGet, url: dst, params: params,
+		tok: tok, method: http.MethodGet, url: dst, params: assured,
 	}, &ps); err != nil {
 		return nil, err
 	}
@@ -162,6 +163,16 @@ func (r *Reddit) setRandomState() {
 
 func (r *Reddit) handleAuthorizationRedirect() (*oauth2.Token, error) {
 	return r.oauth.handleRedirect(r.contextWithUserAgent(), nil, "/smoothie/reddit/authorization")
+}
+
+func (r *Reddit) assureDefaultParams(params url.Values) url.Values {
+	assured := params
+	if assured == nil {
+		assured = make(url.Values)
+	}
+	assured.Set("limit", "100")
+
+	return assured
 }
 
 func (r *Reddit) do(req oauth2Req, dst interface{}) error {
