@@ -57,7 +57,7 @@ func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Value
 			close(tsCh)
 			close(errCh)
 		}()
-		lastID := t.fetchAndSendTweets(dst, params, tsCh, errCh)
+		lastID := t.fetchAndSendTweets(ctx, dst, params, tsCh, errCh)
 		for {
 			select {
 			case <-ctx.Done():
@@ -69,7 +69,7 @@ func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Value
 					}
 					params.Set("since_id", lastID)
 				}
-				lastID = t.fetchAndSendTweets(dst, params, tsCh, errCh)
+				lastID = t.fetchAndSendTweets(ctx, dst, params, tsCh, errCh)
 			}
 		}
 	}()
@@ -77,17 +77,28 @@ func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Value
 	return tsCh, errCh
 }
 
-func (t *Twitter) fetchAndSendTweets(dst string, params url.Values, tsCh chan<- twitter.Tweets, errCh chan<- error) string {
+func (t *Twitter) fetchAndSendTweets(
+	ctx context.Context, dst string, params url.Values,
+	tsCh chan<- twitter.Tweets, errCh chan<- error,
+) string {
 	ts, err := t.fetchTweets(dst, params)
 	if err != nil {
-		errCh <- err
+		select {
+		case <-ctx.Done():
+			errCh <- err
+		default:
+		}
 		return ""
 	}
 	if len(ts) <= 0 {
 		return ""
 	}
 
-	tsCh <- ts
+	select {
+	case <-ctx.Done():
+	default:
+		tsCh <- ts
+	}
 	return ts[0].ID
 }
 
