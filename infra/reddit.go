@@ -125,6 +125,12 @@ func (r *Reddit) do(req oauth2Req, dst interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
+func (r *Reddit) contextWithUserAgent() context.Context {
+	return context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
+		Transport: new(withUserAgent),
+	})
+}
+
 func (r *Reddit) saveAccessToken(tok *oauth2.Token) error {
 	loaded, err := r.loadConfig()
 	if err != nil {
