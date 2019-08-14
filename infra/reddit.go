@@ -78,3 +78,13 @@ func (r *Reddit) do(req oauth2Req, dst interface{}) error {
 
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
+
+func (r *Reddit) saveConfig(cnf redditConfig) error {
+	loaded, err := loadConfig()
+	if err != nil {
+		return err
+	}
+	loaded.Reddit = cnf
+
+	return saveConfig(loaded)
+}
