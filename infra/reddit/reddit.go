@@ -2,9 +2,12 @@ package reddit
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/tomocy/smoothie/domain"
 )
 
 type Posts []*Post
@@ -16,6 +19,17 @@ type Post struct {
 	Title                 string        `json:"title"`
 	SelfText              string        `json:"selftext"`
 	CreatedUTC            unixTimestamp `json:"created_utc"`
+}
+
+func (p *Post) Adapt() *domain.Post {
+	return &domain.Post{
+		ID: p.Name,
+		User: &domain.User{
+			Name: p.Author,
+		},
+		Text:      fmt.Sprintf("%s\n%s", p.SubredditNamePrefixed, p.SelfText),
+		CreatedAt: time.Time(p.CreatedUTC),
+	}
 }
 
 type unixTimestamp time.Time
