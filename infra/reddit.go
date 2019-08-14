@@ -9,8 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
-
-	"github.com/tomocy/deverr"
+	"time"
 
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/reddit"
@@ -41,14 +40,67 @@ type Reddit struct {
 	oauth oauth2Config
 }
 
-func (r *Reddit) StreamPosts(context.Context) (<-chan domain.Posts, <-chan error) {
-	errCh := make(chan error)
+func (r *Reddit) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+	psCh, errCh := r.streamPosts(ctx, r.endpoint("/new"), nil)
+	ch := make(chan domain.Posts)
 	go func() {
-		close(errCh)
-		errCh <- deverr.NotImplemented
+		defer close(ch)
+		for ps := range psCh {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				ch <- ps.Adapt()
+			}
+		}
 	}()
 
-	return nil, errCh
+	return ch, errCh
+}
+
+func (r *Reddit) streamPosts(ctx context.Context, dst string, params url.Values) (<-chan *reddit.Posts, <-chan error) {
+	psCh, errCh := make(chan *reddit.Posts), make(chan error)
+	go func() {
+		defer func() {
+			close(psCh)
+			close(errCh)
+		}()
+
+		lastID := r.fetchAndSendPosts(dst, params, psCh, errCh)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(2 * time.Minute):
+				if lastID != "" {
+					if params == nil {
+						params = make(url.Values)
+					}
+					params.Set("before", lastID)
+				}
+				if id := r.fetchAndSendPosts(dst, params, psCh, errCh); id != "" {
+					lastID = id
+				}
+			}
+		}
+	}()
+
+	return psCh, errCh
+}
+
+func (r *Reddit) fetchAndSendPosts(dst string, params url.Values, psCh chan<- *reddit.Posts, errCh chan<- error) string {
+	ps, err := r.fetchPosts(dst, params)
+	if err != nil {
+		return ""
+	}
+	if len(ps.Data.Children) <= 0 {
+		return ""
+	}
+
+	lastID := ps.Data.Children[0].Data.Name
+	psCh <- ps
+
+	return lastID
 }
 
 func (r *Reddit) FetchPosts() (domain.Posts, error) {
