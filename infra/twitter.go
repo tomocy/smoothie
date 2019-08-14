@@ -69,7 +69,9 @@ func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Value
 					}
 					params.Set("since_id", lastID)
 				}
-				lastID = t.fetchAndSendTweets(ctx, dst, params, tsCh, errCh)
+				if id := t.fetchAndSendTweets(ctx, dst, params, tsCh, errCh); id != "" {
+					lastID = id
+				}
 			}
 		}
 	}()
