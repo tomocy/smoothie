@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"github.com/tomocy/smoothie/infra/reddit"
 	"golang.org/x/oauth2"
@@ -100,4 +101,11 @@ func (r *Reddit) saveConfig(cnf redditConfig) error {
 	loaded.Reddit = cnf
 
 	return saveConfig(loaded)
+}
+
+func (r *Reddit) endpoint(ps ...string) string {
+	parsed, _ := url.Parse("https://oauth.reddit.com")
+	ss := append([]string{parsed.Path}, ps...)
+	parsed.Path = filepath.Join(ss...)
+	return parsed.String()
 }
