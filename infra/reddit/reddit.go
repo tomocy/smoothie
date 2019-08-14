@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+type Posts []*Post
+
 type Post struct {
 	Name                  string        `json:"name"`
 	SubredditNamePrefixed string        `json:"subreddit_name_prefixed"`
