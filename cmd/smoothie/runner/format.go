@@ -3,7 +3,9 @@ package runner
 import (
 	"fmt"
 	"io"
+	"strings"
 
+	"github.com/buger/goterm"
 	"github.com/tomocy/smoothie/domain"
 )
 
@@ -12,15 +14,19 @@ type text struct {
 }
 
 func (t *text) PrintPosts(w io.Writer, ps domain.Posts) {
-	vl := "----------"
 	for _, p := range ps {
 		if !t.printed {
-			fmt.Fprintln(w, vl)
+			t.printVerticalLine(w)
 			t.printed = true
 		}
 		t.printPost(w, p)
-		fmt.Fprintln(w, vl)
+		t.printVerticalLine(w)
 	}
+}
+
+func (t *text) printVerticalLine(w io.Writer) {
+	width := goterm.Width()
+	fmt.Fprintln(w, strings.Repeat("-", width))
 }
 
 func (t *text) printPost(w io.Writer, p *domain.Post) {
