@@ -14,6 +14,10 @@ type Reddit struct {
 }
 
 func (r *Reddit) retreiveAuthorization() (*oauth2.Token, error) {
+	if cnf, err := r.loadConfig(); err == nil {
+		return cnf.AccessToken, nil
+	}
+
 	url := r.authCodeURL()
 	fmt.Printf("reddit: open this link: %s\n", url)
 
