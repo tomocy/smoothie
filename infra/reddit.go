@@ -6,12 +6,30 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
 
+	"github.com/tomocy/smoothie/infra/reddit"
 	"golang.org/x/oauth2"
 )
 
 type Reddit struct {
 	oauth oauth2Config
+}
+
+func (r *Reddit) fetchPosts(dst string, params url.Values) (reddit.Posts, error) {
+	tok, err := r.retreiveAuthorization()
+	if err != nil {
+		return nil, err
+	}
+
+	var ps reddit.Posts
+	if err := r.do(oauth2Req{
+		tok: tok, method: http.MethodGet, url: dst, params: params,
+	}, &ps); err != nil {
+		return nil, err
+	}
+
+	return ps, nil
 }
 
 func (r *Reddit) retreiveAuthorization() (*oauth2.Token, error) {
