@@ -89,11 +89,11 @@ func (c *oauth2Config) handleRedirect(ctx context.Context, params []oauth2.AuthC
 	}
 }
 
-func (c *oauth2Config) handlerForRedirect(ctx context.Context, params []oauth2.AuthCodeOption, tokCh chan<- *oauth2.Token, errCh chan<- errCh) http.Handler {
+func (c *oauth2Config) handlerForRedirect(ctx context.Context, params []oauth2.AuthCodeOption, tokCh chan<- *oauth2.Token, errCh chan<- error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		state, code := q.Get("state"), q.Get("code")
-		if err := c.checkState(); err != nil {
+		if err := c.checkState(state); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			errCh <- err
 			return
@@ -110,7 +110,7 @@ func (c *oauth2Config) handlerForRedirect(ctx context.Context, params []oauth2.A
 	})
 }
 
-func (c *oauth2Config) checkState() error {
+func (c *oauth2Config) checkState(state string) error {
 	stored := c.state
 	c.state = ""
 	if state != stored {
