@@ -37,7 +37,14 @@ func (t *Twitter) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan 
 	psCh := make(chan domain.Posts)
 	go func() {
 		defer close(psCh)
-		psCh <- (<-tsCh).Adapt()
+		for ts := range tsCh {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				psCh <- ts.Adapt()
+			}
+		}
 	}()
 
 	return psCh, errCh
