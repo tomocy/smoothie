@@ -62,6 +62,12 @@ func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
 	return client.Get(http.DefaultClient, r.cred, r.url, r.params)
 }
 
+type oauth2Req struct {
+	tok         *oauth2.Token
+	method, url string
+	params      url.Values
+}
+
 type oauth2Config struct {
 	state string
 	cnf   oauth2.Config
