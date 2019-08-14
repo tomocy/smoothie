@@ -120,6 +120,14 @@ func (c *oauth2Config) checkState() error {
 	return nil
 }
 
+type withUserAgent struct{}
+
+func (w *withUserAgent) RoundTrip(r *http.Request) (*http.Response, error) {
+	r.Header.Set("User-Agent", "smoothie/0.0")
+
+	return http.DefaultTransport.RoundTrip(r)
+}
+
 func loadConfig() (config, error) {
 	name := configFilename()
 	src, err := os.Open(name)
