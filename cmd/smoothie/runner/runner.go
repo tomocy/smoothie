@@ -153,6 +153,7 @@ func (h *Help) Run() error {
 func newPostUsecase() *app.PostUsecase {
 	rs := make(map[string]domain.PostRepo)
 	rs["twitter"] = infra.NewTwitter("veJZFekufj9cTtZanGR3cQHb8", "3YCw03uDthldomPSrHPz7TnjWy2lzIqKe3iTlURXue79mk2MLm")
+	rs["reddit"] = infra.NewReddit("ykZikE5-hzb6QQ", "5Kxg4rZkY0Wk8-xjzz8vH11xlW8")
 
 	return app.NewPostUsecase(rs)
 }
