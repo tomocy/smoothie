@@ -14,8 +14,6 @@ func TestStremPostsOfDrivers(t *testing.T) {
 	expecteds := domain.Posts{
 		{ID: "1", Driver: "a", Text: "one", CreatedAt: expectedDate.Add(2 * time.Hour)},
 		{ID: "1", Driver: "b", Text: "one", CreatedAt: expectedDate.Add(2 * time.Hour)},
-		{ID: "2", Driver: "a", Text: "two", CreatedAt: expectedDate.Add(1 * time.Hour)},
-		{ID: "2", Driver: "b", Text: "two", CreatedAt: expectedDate.Add(1 * time.Hour)},
 	}
 	u := newMockPostUsecase()
 	ctx, cancelFn := context.WithCancel(context.Background())
