@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/garyburd/go-oauth/oauth"
+	"golang.org/x/oauth2"
 )
 
 func init() {
@@ -57,6 +58,11 @@ func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
 	}
 
 	return client.Get(http.DefaultClient, r.cred, r.url, r.params)
+}
+
+type oauth2Config struct {
+	state string
+	cnf   oauth2.Config
 }
 
 func loadConfig() (config, error) {
