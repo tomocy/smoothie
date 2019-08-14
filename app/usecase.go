@@ -24,7 +24,6 @@ func (u *PostUsecase) StreamPostsOfDrivers(ctx context.Context, ds ...string) (<
 	for i, d := range ds {
 		psChs[i], errChs[i] = u.streamPosts(ctx, d)
 	}
-	time.Sleep(400 * time.Millisecond)
 
 	return u.fanInPosts(ctx, psChs...), u.fanInErrors(ctx, errChs...)
 }
