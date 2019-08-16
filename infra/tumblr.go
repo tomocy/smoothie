@@ -52,8 +52,8 @@ func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 	return ch, errCh
 }
 
-func (t *Tumblr) streamPosts(ctx context.Context, dst string, params url.Values) (<-chan *tumblr.Posts, <-chan error) {
-	psCh, errCh := make(chan *tumblr.Posts), make(chan error)
+func (t *Tumblr) streamPosts(ctx context.Context, dst string, params url.Values) (<-chan tumblr.Posts, <-chan error) {
+	psCh, errCh := make(chan tumblr.Posts), make(chan error)
 	go func() {
 		defer func() {
 			close(psCh)
@@ -81,18 +81,18 @@ func (t *Tumblr) streamPosts(ctx context.Context, dst string, params url.Values)
 	return psCh, errCh
 }
 
-func (t *Tumblr) fetchAndSendPosts(dst string, params url.Values, psCh chan<- *tumblr.Posts, errCh chan<- error) string {
+func (t *Tumblr) fetchAndSendPosts(dst string, params url.Values, psCh chan<- tumblr.Posts, errCh chan<- error) string {
 	ps, err := t.fetchPosts(dst, params)
 	if err != nil {
 		errCh <- err
 		return ""
 	}
-	if len(ps.Resp.Posts) <= 0 {
+	if len(ps) <= 0 {
 		return ""
 	}
 
 	psCh <- ps
-	return fmt.Sprintf("%d", ps.Resp.Posts[0].ID)
+	return fmt.Sprintf("%d", ps[0].ID)
 }
 
 func (t *Tumblr) FetchPosts() (domain.Posts, error) {
@@ -104,23 +104,23 @@ func (t *Tumblr) FetchPosts() (domain.Posts, error) {
 	return ps.Adapt(), nil
 }
 
-func (t *Tumblr) fetchPosts(dst string, params url.Values) (*tumblr.Posts, error) {
+func (t *Tumblr) fetchPosts(dst string, params url.Values) (tumblr.Posts, error) {
 	cred, err := t.retreiveAuthorization()
 	if err != nil {
 		return nil, err
 	}
 
-	var ps *tumblr.Posts
+	var resp *tumblr.Resp
 	if err := t.do(oauthReq{
 		cred: cred, method: http.MethodGet, url: dst, params: params,
-	}, &ps); err != nil {
+	}, &resp); err != nil {
 		return nil, err
 	}
 	if err := t.saveAccessToken(cred); err != nil {
 		return nil, err
 	}
 
-	return ps, nil
+	return resp.Resp.Posts, nil
 }
 
 func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
