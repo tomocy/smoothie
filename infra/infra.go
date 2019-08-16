@@ -192,7 +192,7 @@ type oauthConfig struct {
 }
 
 type redditConfig struct {
-	AccessToken *oauth2.Token `json:"access_token"`
+	oauth2Config
 }
 
 type oauth2Config struct {
