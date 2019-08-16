@@ -18,7 +18,7 @@ import (
 
 func NewReddit(id, secret string) *Reddit {
 	return &Reddit{
-		oauth: oauth2Config{
+		oauth: oauth2Manager{
 			cnf: oauth2.Config{
 				ClientID:     id,
 				ClientSecret: secret,
@@ -37,7 +37,7 @@ func NewReddit(id, secret string) *Reddit {
 }
 
 type Reddit struct {
-	oauth oauth2Config
+	oauth oauth2Manager
 }
 
 func (r *Reddit) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {

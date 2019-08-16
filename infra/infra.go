@@ -85,12 +85,12 @@ func (r *oauth2Req) do(ctx context.Context, cnf oauth2.Config) (*http.Response, 
 	return client.Get(parsed.String())
 }
 
-type oauth2Config struct {
+type oauth2Manager struct {
 	state string
 	cnf   oauth2.Config
 }
 
-func (c *oauth2Config) handleRedirect(ctx context.Context, params []oauth2.AuthCodeOption, path string) (*oauth2.Token, error) {
+func (c *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.AuthCodeOption, path string) (*oauth2.Token, error) {
 	tokCh, errCh := make(chan *oauth2.Token), make(chan error)
 	go func() {
 		defer func() {
@@ -112,7 +112,7 @@ func (c *oauth2Config) handleRedirect(ctx context.Context, params []oauth2.AuthC
 	}
 }
 
-func (c *oauth2Config) handlerForRedirect(ctx context.Context, params []oauth2.AuthCodeOption, tokCh chan<- *oauth2.Token, errCh chan<- error) http.Handler {
+func (c *oauth2Manager) handlerForRedirect(ctx context.Context, params []oauth2.AuthCodeOption, tokCh chan<- *oauth2.Token, errCh chan<- error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		state, code := q.Get("state"), q.Get("code")
@@ -133,7 +133,7 @@ func (c *oauth2Config) handlerForRedirect(ctx context.Context, params []oauth2.A
 	})
 }
 
-func (c *oauth2Config) checkState(state string) error {
+func (c *oauth2Manager) checkState(state string) error {
 	stored := c.state
 	c.state = ""
 	if state != stored {
