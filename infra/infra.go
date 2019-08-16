@@ -184,7 +184,7 @@ type config struct {
 }
 
 type twitterConfig struct {
-	AccessCredentials *oauth.Credentials `json:"access_credentials"`
+	oauthConfig
 }
 
 type oauthConfig struct {
