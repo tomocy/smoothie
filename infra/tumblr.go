@@ -28,7 +28,7 @@ type Tumblr struct {
 	oauthClient oauth.Client
 }
 
-func (t *Tumblr) StreamPostsOfDrivers(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
 	psCh, errCh := make(chan domain.Posts), make(chan error)
 	go func() {
 		defer func() {
