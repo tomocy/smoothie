@@ -187,6 +187,10 @@ type twitterConfig struct {
 	AccessCredentials *oauth.Credentials `json:"access_credentials"`
 }
 
+type oauthConfig struct {
+	AccessCredentials *oauth.Credentials `json:"access_credentials"`
+}
+
 type redditConfig struct {
 	AccessToken *oauth2.Token `json:"access_token"`
 }
