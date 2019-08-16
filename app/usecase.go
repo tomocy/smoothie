@@ -49,39 +49,35 @@ func (u *PostUsecase) fanInPosts(ctx context.Context, chs ...<-chan domain.Posts
 	fannedInCh := make(chan domain.Posts)
 	go func() {
 		defer close(fannedInCh)
-		fanIn := func(dst chan<- domain.Posts, srces []<-chan domain.Posts) bool {
+		fanIn := func(dst chan<- domain.Posts, srces []<-chan domain.Posts, doSkip bool) {
 			var fannedIn domain.Posts
 			for _, src := range srces {
-				select {
-				case ps := <-src:
+				if doSkip {
+					select {
+					case ps := <-src:
+						fannedIn = append(fannedIn, ps...)
+					default:
+					}
+				} else {
+					ps := <-src
 					fannedIn = append(fannedIn, ps...)
-				default:
 				}
 			}
-
 			if len(fannedIn) <= 0 {
-				return false
+				return
 			}
+
 			fannedIn.SortByNewest()
 			dst <- fannedIn
+		}
 
-			return true
-		}
-	waiting:
-		for {
-			select {
-			case <-time.After(1 * time.Second):
-				if fanIn(fannedInCh, chs) {
-					break waiting
-				}
-			}
-		}
+		fanIn(fannedInCh, chs, false)
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-time.After(1 * time.Minute):
-				fanIn(fannedInCh, chs)
+				fanIn(fannedInCh, chs, true)
 			}
 		}
 	}()
