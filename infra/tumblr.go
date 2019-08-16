@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/tomocy/deverr"
@@ -52,7 +53,12 @@ func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 }
 
 func (t *Tumblr) FetchPosts() (domain.Posts, error) {
-	return nil, deverr.NotImplemented
+	ps, err := t.fetchPosts(t.endpoint("/user/dashboard"), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return ps.Adapt(), nil
 }
 
 func (t *Tumblr) fetchPosts(dst string, params url.Values) (*tumblr.Posts, error) {
@@ -139,4 +145,11 @@ func (t *Tumblr) saveConfig(cnf tumblrConfig) error {
 	loaded.Tumblr = cnf
 
 	return saveConfig(loaded)
+}
+
+func (t *Tumblr) endpoint(ps ...string) string {
+	parsed, _ := url.Parse("https://api.tumblr.com/v2")
+	ss := append([]string{parsed.Path}, ps...)
+	parsed.Path = filepath.Join(ss...)
+	return parsed.String()
 }
