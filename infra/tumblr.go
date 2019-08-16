@@ -11,6 +11,19 @@ import (
 	"github.com/tomocy/smoothie/domain"
 )
 
+func NewTumblr(id, secret string) *Tumblr {
+	return &Tumblr{
+		oauthClient: oauth.Client{
+			TemporaryCredentialRequestURI: "https://www.tumblr.com/oauth/request_token",
+			ResourceOwnerAuthorizationURI: "https://www.tumblr.com/oauth/authorize",
+			TokenRequestURI:               "https://www.tumblr.com/oauth/access_token",
+			Credentials: oauth.Credentials{
+				Token: id, Secret: secret,
+			},
+		},
+	}
+}
+
 type Tumblr struct {
 	oauthClient oauth.Client
 }
