@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12
+
+    working_directory: /go/src/github.com/tomocy/smoothie
+    steps:
+      - checkout
+
+      - run: go get -v -t -d ./...
+      - run: go vet ./...
+      - run: go test -v ./...
