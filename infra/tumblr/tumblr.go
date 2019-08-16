@@ -8,6 +8,12 @@ import (
 	"github.com/tomocy/smoothie/domain"
 )
 
+type Posts struct {
+	Resp struct {
+		Posts []*Post `json:"posts"`
+	} `json:"response"`
+}
+
 type Post struct {
 	ID       string    `json:"id"`
 	BlogName string    `json:"blog_name"`
