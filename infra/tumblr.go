@@ -118,6 +118,16 @@ func (t *Tumblr) do(r oauthReq, dst interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
+func (t *Tumblr) saveAccessToken(cred *oauth.Credentials) error {
+	loaded, err := t.loadConfig()
+	if err != nil {
+		return err
+	}
+	loaded.AccessCredentials = cred
+
+	return t.saveConfig(loaded)
+}
+
 func (t *Tumblr) saveConfig(cnf tumblrConfig) error {
 	loaded, err := loadConfig()
 	if err != nil {
