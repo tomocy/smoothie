@@ -219,6 +219,7 @@ func saveConfig(cnf config) error {
 }
 
 type config struct {
+	Tumblr  tumblrConfig  `json:"tumblr"`
 	Twitter twitterConfig `json:"twitter"`
 	Reddit  redditConfig  `json:"reddit"`
 }
