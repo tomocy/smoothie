@@ -228,6 +228,10 @@ type tumblrConfig struct {
 	oauthConfig
 }
 
+func (c *tumblrConfig) isZero() bool {
+	return c.oauthConfig.isZero()
+}
+
 type twitterConfig struct {
 	oauthConfig
 }
