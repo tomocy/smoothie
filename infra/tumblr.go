@@ -117,3 +117,13 @@ func (t *Tumblr) do(r oauthReq, dst interface{}) error {
 
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
+
+func (t *Tumblr) saveConfig(cnf tumblrConfig) error {
+	loaded, err := loadConfig()
+	if err != nil {
+		return err
+	}
+	loaded.Tumblr = cnf
+
+	return saveConfig(loaded)
+}
