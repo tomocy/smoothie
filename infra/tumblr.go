@@ -58,22 +58,25 @@ func (t *Tumblr) FetchPosts() (domain.Posts, error) {
 }
 
 func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
-	temp, err := t.oauth.client.RequestTemporaryCredentials(http.DefaultClient, "", nil)
+	url, err := t.authorizationURL()
 	if err != nil {
 		return nil, err
 	}
-
-	return t.requestClientAuthorization(temp)
-}
-
-func (t *Tumblr) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Credentials, error) {
-	url := t.oauth.client.AuthorizationURL(temp, nil)
 	fmt.Printf("open this url: %s\n", url)
 
-	fmt.Print("PIN: ")
-	var pin string
-	fmt.Scan(&pin)
+	return t.handleAuthorizationRedirect()
+}
 
-	token, _, err := t.oauth.client.RequestToken(http.DefaultClient, temp, pin)
-	return token, err
+func (t *Tumblr) authorizationURL() (string, error) {
+	temp, err := t.oauth.client.RequestTemporaryCredentials(http.DefaultClient, "", nil)
+	if err != nil {
+		return "", err
+	}
+	t.oauth.temp = temp
+
+	return t.oauth.client.AuthorizationURL(temp, nil), nil
+}
+
+func (t *Tumblr) handleAuthorizationRedirect() (*oauth.Credentials, error) {
+	return t.oauth.handleRedirect(context.Background(), "/smoothie/tumblr/authorization")
 }
