@@ -164,7 +164,6 @@ func (t *Twitter) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Cr
 	fmt.Scanln(&pin)
 
 	token, _, err := t.oauthClient.RequestToken(http.DefaultClient, temp, pin)
-
 	return token, err
 }
 
