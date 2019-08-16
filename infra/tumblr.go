@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"github.com/garyburd/go-oauth/oauth"
-	"github.com/tomocy/deverr"
 
+	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/tumblr"
 )
@@ -50,6 +51,49 @@ func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 	}()
 
 	return psCh, errCh
+}
+
+func (t *Tumblr) streamPosts(ctx context.Context, dst string, params url.Values) (<-chan *tumblr.Posts, <-chan error) {
+	psCh, errCh := make(chan *tumblr.Posts), make(chan error)
+	go func() {
+		defer func() {
+			close(psCh)
+			close(errCh)
+		}()
+		lastID := t.fetchAndSendPosts(dst, params, psCh, errCh)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(5 * time.Minute):
+				if lastID != "" {
+					if params == nil {
+						params = make(url.Values)
+					}
+					params.Set("since_id", lastID)
+				}
+				if id := t.fetchAndSendPosts(dst, params, psCh, errCh); id != "" {
+					lastID = id
+				}
+			}
+		}
+	}()
+
+	return psCh, errCh
+}
+
+func (t *Tumblr) fetchAndSendPosts(dst string, params url.Values, psCh chan<- *tumblr.Posts, errCh chan<- error) string {
+	ps, err := t.fetchPosts(dst, params)
+	if err != nil {
+		errCh <- err
+		return ""
+	}
+	if len(ps.Resp.Posts) <= 0 {
+		return ""
+	}
+
+	psCh <- ps
+	return fmt.Sprintf("%d", ps.Resp.Posts[0].ID)
 }
 
 func (t *Tumblr) FetchPosts() (domain.Posts, error) {
