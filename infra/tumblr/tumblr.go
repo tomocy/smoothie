@@ -14,6 +14,15 @@ type Posts struct {
 	} `json:"response"`
 }
 
+func (ps *Posts) Adapt() domain.Posts {
+	adapteds := make(domain.Posts, len(ps.Resp.Posts))
+	for i, p := range ps.Resp.Posts {
+		adapteds[i] = p.Adapt()
+	}
+
+	return adapteds
+}
+
 type Post struct {
 	ID       string    `json:"id"`
 	BlogName string    `json:"blog_name"`
