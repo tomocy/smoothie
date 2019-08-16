@@ -86,7 +86,43 @@ func (r *oauth2Req) do(ctx context.Context, cnf oauth2.Config) (*http.Response, 
 }
 
 type oauthManager struct {
+	temp   *oauth.Credentials
 	client oauth.Client
+}
+
+func (m *oauthManager) handleRedirect(ctx context.Context, path string) (*oauth.Credentials, error) {
+	credCh, errCh := make(chan *oauth.Credentials), make(chan error)
+	go func() {
+		defer func() {
+			close(credCh)
+			close(errCh)
+		}()
+		http.Handle(path, m.handlerForRedirect(ctx, credCh, errCh))
+		if err := http.ListenAndServe(":80", nil); err != nil {
+			errCh <- err
+		}
+	}()
+
+	select {
+	case cred := <-credCh:
+		return cred, nil
+	case err := <-errCh:
+		return nil, err
+	}
+}
+
+func (m *oauthManager) handlerForRedirect(ctx context.Context, credCh chan<- *oauth.Credentials, errCh chan<- error) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		v := r.URL.Query().Get("oauth_verifier")
+
+		token, _, err := m.client.RequestTokenContext(ctx, m.temp, v)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			errCh <- err
+			return
+		}
+		credCh <- token
+	})
 }
 
 type oauth2Manager struct {
