@@ -33,7 +33,8 @@ type Post struct {
 
 func (p *Post) Adapt() *domain.Post {
 	return &domain.Post{
-		ID: fmt.Sprintf("%d", p.ID),
+		ID:     fmt.Sprintf("%d", p.ID),
+		Driver: "tumblr",
 		User: &domain.User{
 			Name: p.BlogName,
 		},
