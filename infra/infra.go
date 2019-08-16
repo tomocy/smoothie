@@ -236,6 +236,14 @@ type oauthConfig struct {
 	AccessCredentials *oauth.Credentials `json:"access_credentials"`
 }
 
+func (c *oauthConfig) isZero() bool {
+	if c.AccessCredentials != nil {
+		return false
+	}
+
+	return true
+}
+
 type redditConfig struct {
 	oauth2Config
 }
