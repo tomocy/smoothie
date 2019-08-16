@@ -67,6 +67,9 @@ func (t *Tumblr) fetchPosts(dst string, params url.Values) (*tumblr.Posts, error
 	}, &ps); err != nil {
 		return nil, err
 	}
+	if err := t.saveAccessToken(cred); err != nil {
+		return nil, err
+	}
 
 	return ps, nil
 }
