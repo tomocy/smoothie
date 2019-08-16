@@ -13,19 +13,21 @@ import (
 
 func NewTumblr(id, secret string) *Tumblr {
 	return &Tumblr{
-		oauthClient: oauth.Client{
-			TemporaryCredentialRequestURI: "https://www.tumblr.com/oauth/request_token",
-			ResourceOwnerAuthorizationURI: "https://www.tumblr.com/oauth/authorize",
-			TokenRequestURI:               "https://www.tumblr.com/oauth/access_token",
-			Credentials: oauth.Credentials{
-				Token: id, Secret: secret,
+		oauth: oauthManager{
+			client: oauth.Client{
+				TemporaryCredentialRequestURI: "https://www.tumblr.com/oauth/request_token",
+				ResourceOwnerAuthorizationURI: "https://www.tumblr.com/oauth/authorize",
+				TokenRequestURI:               "https://www.tumblr.com/oauth/access_token",
+				Credentials: oauth.Credentials{
+					Token: id, Secret: secret,
+				},
 			},
 		},
 	}
 }
 
 type Tumblr struct {
-	oauthClient oauth.Client
+	oauth oauthManager
 }
 
 func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
@@ -47,11 +49,16 @@ func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 }
 
 func (t *Tumblr) FetchPosts() (domain.Posts, error) {
+	_, err := t.retreiveAuthorization()
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, deverr.NotImplemented
 }
 
 func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
-	temp, err := t.oauthClient.RequestTemporaryCredentials(http.DefaultClient, "", nil)
+	temp, err := t.oauth.client.RequestTemporaryCredentials(http.DefaultClient, "", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -60,13 +67,13 @@ func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
 }
 
 func (t *Tumblr) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Credentials, error) {
-	url := t.oauthClient.AuthorizationURL(temp, nil)
+	url := t.oauth.client.AuthorizationURL(temp, nil)
 	fmt.Printf("open this url: %s\n", url)
 
 	fmt.Print("PIN: ")
 	var pin string
 	fmt.Scan(&pin)
 
-	token, _, err := t.oauthClient.RequestToken(http.DefaultClient, temp, pin)
+	token, _, err := t.oauth.client.RequestToken(http.DefaultClient, temp, pin)
 	return token, err
 }
