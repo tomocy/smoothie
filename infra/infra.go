@@ -94,7 +94,7 @@ type oauth2Manager struct {
 	cnf   oauth2.Config
 }
 
-func (c *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.AuthCodeOption, path string) (*oauth2.Token, error) {
+func (m *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.AuthCodeOption, path string) (*oauth2.Token, error) {
 	tokCh, errCh := make(chan *oauth2.Token), make(chan error)
 	go func() {
 		defer func() {
@@ -102,7 +102,7 @@ func (c *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.Auth
 			close(errCh)
 		}()
 
-		http.Handle(path, c.handlerForRedirect(ctx, params, tokCh, errCh))
+		http.Handle(path, m.handlerForRedirect(ctx, params, tokCh, errCh))
 		if err := http.ListenAndServe(":80", nil); err != nil {
 			errCh <- err
 		}
@@ -116,17 +116,17 @@ func (c *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.Auth
 	}
 }
 
-func (c *oauth2Manager) handlerForRedirect(ctx context.Context, params []oauth2.AuthCodeOption, tokCh chan<- *oauth2.Token, errCh chan<- error) http.Handler {
+func (m *oauth2Manager) handlerForRedirect(ctx context.Context, params []oauth2.AuthCodeOption, tokCh chan<- *oauth2.Token, errCh chan<- error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		state, code := q.Get("state"), q.Get("code")
-		if err := c.checkState(state); err != nil {
+		if err := m.checkState(state); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			errCh <- err
 			return
 		}
 
-		tok, err := c.cnf.Exchange(ctx, code, params...)
+		tok, err := m.cnf.Exchange(ctx, code, params...)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			errCh <- err
@@ -137,9 +137,9 @@ func (c *oauth2Manager) handlerForRedirect(ctx context.Context, params []oauth2.
 	})
 }
 
-func (c *oauth2Manager) checkState(state string) error {
-	stored := c.state
-	c.state = ""
+func (m *oauth2Manager) checkState(state string) error {
+	stored := m.state
+	m.state = ""
 	if state != stored {
 		return errors.New("invalid state")
 	}
