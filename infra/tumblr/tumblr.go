@@ -24,24 +24,38 @@ func (ps *Posts) Adapt() domain.Posts {
 }
 
 type Post struct {
-	ID       string    `json:"id"`
-	BlogName string    `json:"blog_name"`
-	Summary  string    `json:"summary"`
-	Tags     []string  `json:"tags"`
-	Date     time.Time `json:"date"`
+	ID       int      `json:"id"`
+	BlogName string   `json:"blog_name"`
+	Summary  string   `json:"summary"`
+	Tags     []string `json:"tags"`
+	Date     date     `json:"date"`
 }
 
 func (p *Post) Adapt() *domain.Post {
 	return &domain.Post{
-		ID: p.ID,
+		ID: fmt.Sprintf("%d", p.ID),
 		User: &domain.User{
 			Name: p.BlogName,
 		},
 		Text:      p.joinText(),
-		CreatedAt: p.Date,
+		CreatedAt: time.Time(p.Date),
 	}
 }
 
 func (p *Post) joinText() string {
 	return fmt.Sprintf("%s\n%s", p.Summary, strings.Join(p.Tags, " "))
+}
+
+type date time.Time
+
+func (d *date) UnmarshalJSON(data []byte) error {
+	s := string(data)
+	withoutQuotes := s[1 : len(s)-1]
+	parsed, err := time.Parse("2006-01-02 15:04:05 MST", withoutQuotes)
+	if err != nil {
+		return err
+	}
+	*d = date(parsed.Local())
+
+	return nil
 }
