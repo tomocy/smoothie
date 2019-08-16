@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -92,4 +93,14 @@ func (t *Tumblr) authorizationURL() (string, error) {
 
 func (t *Tumblr) handleAuthorizationRedirect() (*oauth.Credentials, error) {
 	return t.oauth.handleRedirect(context.Background(), "/smoothie/tumblr/authorization")
+}
+
+func (t *Tumblr) do(r oauthReq, dst interface{}) error {
+	resp, err := r.do(t.oauth.client)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return json.NewDecoder(resp.Body).Decode(dst)
 }
