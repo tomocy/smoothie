@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/garyburd/go-oauth/oauth"
 	"github.com/tomocy/deverr"
 
 	"github.com/tomocy/smoothie/domain"
+	"github.com/tomocy/smoothie/infra/tumblr"
 )
 
 func NewTumblr(id, secret string) *Tumblr {
@@ -50,12 +52,23 @@ func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 }
 
 func (t *Tumblr) FetchPosts() (domain.Posts, error) {
-	_, err := t.retreiveAuthorization()
+	return nil, deverr.NotImplemented
+}
+
+func (t *Tumblr) fetchPosts(dst string, params url.Values) (*tumblr.Posts, error) {
+	cred, err := t.retreiveAuthorization()
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, deverr.NotImplemented
+	var ps *tumblr.Posts
+	if err := t.do(oauthReq{
+		cred: cred, method: http.MethodGet, url: dst, params: params,
+	}, &ps); err != nil {
+		return nil, err
+	}
+
+	return ps, nil
 }
 
 func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
