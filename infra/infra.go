@@ -223,6 +223,10 @@ type config struct {
 	Reddit  redditConfig  `json:"reddit"`
 }
 
+type tumblrConfig struct {
+	oauthConfig
+}
+
 type twitterConfig struct {
 	oauthConfig
 }
