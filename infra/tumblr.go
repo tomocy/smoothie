@@ -58,6 +58,10 @@ func (t *Tumblr) FetchPosts() (domain.Posts, error) {
 }
 
 func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
+	if cnf, err := t.loadConfig(); err == nil && !cnf.isZero() {
+		return cnf.AccessCredentials, nil
+	}
+
 	url, err := t.authorizationURL()
 	if err != nil {
 		return nil, err
