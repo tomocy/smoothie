@@ -11,7 +11,6 @@ import (
 
 	"github.com/garyburd/go-oauth/oauth"
 
-	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/tumblr"
 )
@@ -36,21 +35,21 @@ type Tumblr struct {
 }
 
 func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
-	psCh, errCh := make(chan domain.Posts), make(chan error)
+	psCh, errCh := t.streamPosts(ctx, t.endpoint("/user/dashboard"), nil)
+	ch := make(chan domain.Posts)
 	go func() {
-		defer func() {
-			close(psCh)
-			close(errCh)
-		}()
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			errCh <- deverr.NotImplemented
+		defer close(ch)
+		for ps := range psCh {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				ch <- ps.Adapt()
+			}
 		}
 	}()
 
-	return psCh, errCh
+	return ch, errCh
 }
 
 func (t *Tumblr) streamPosts(ctx context.Context, dst string, params url.Values) (<-chan *tumblr.Posts, <-chan error) {
