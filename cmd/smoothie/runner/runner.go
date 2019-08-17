@@ -54,7 +54,8 @@ type config struct {
 const (
 	modeCLI = "cli"
 
-	formatText = "text"
+	formatText  = "text"
+	formatColor = "color"
 )
 
 func newPresenter(mode, format string) presenter {
@@ -76,6 +77,8 @@ func newPrinter(format string) printer {
 	switch format {
 	case formatText:
 		return new(text)
+	case formatColor:
+		return new(color)
 	default:
 		return nil
 	}
