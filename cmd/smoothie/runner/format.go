@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/buger/goterm"
+	colorPkg "github.com/fatih/color"
 	"github.com/tomocy/smoothie/domain"
 )
 
@@ -39,4 +40,9 @@ func (t *text) printPost(w io.Writer, p *domain.Post) {
 
 type color struct {
 	printed bool
+	white   *colorPkg.Color
+}
+
+func (c *color) init() {
+	c.white = colorPkg.New(colorPkg.FgWhite)
 }
