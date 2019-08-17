@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"github.com/buger/goterm"
 	colorPkg "github.com/fatih/color"
@@ -38,9 +39,49 @@ func (t *text) printPost(w io.Writer, p *domain.Post) {
 	fmt.Fprintf(w, " %s\n%s\n", p.CreatedAt.Format("2006/01/02 15:04"), p.Text)
 }
 
+var (
+	driverColors = map[string]*colorPkg.Color{
+		"tumblr":  colorPkg.New(colorPkg.FgBlue),
+		"twitter": colorPkg.New(colorPkg.FgBlue),
+		"reddit":  colorPkg.New(colorPkg.FgRed),
+	}
+)
+
 type color struct {
 	printed bool
+	inited  sync.Once
 	white   *colorPkg.Color
+}
+
+func (c *color) PrintPosts(w io.Writer, ps domain.Posts) {
+	for _, p := range ps {
+		if !c.printed {
+			c.printVerticalLine(w)
+		}
+		c.printPost(w, p)
+		c.printVerticalLine(w)
+	}
+}
+
+func (c *color) printVerticalLine(w io.Writer) {
+	c.inited.Do(c.init)
+	width := goterm.Width()
+	c.white.Fprintln(w, strings.Repeat("-", width))
+}
+
+func (c *color) printPost(w io.Writer, p *domain.Post) {
+	c.inited.Do(c.init)
+	c.white.Fprint(w, "(")
+	driverCol, ok := driverColors[p.Driver]
+	if !ok {
+		driverCol = c.white
+	}
+	driverCol.Fprint(w, p.Driver)
+	c.white.Fprintf(w, ") %s", p.User.Name)
+	if p.User.Username != "" {
+		c.white.Fprintf(w, " @%s", p.User.Username)
+	}
+	c.white.Fprintf(w, " %s\n%s\n", p.CreatedAt.Format("2006/01/02 15:04"), p.Text)
 }
 
 func (c *color) init() {
