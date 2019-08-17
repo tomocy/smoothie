@@ -12,15 +12,14 @@ import (
 )
 
 type text struct {
-	printed bool
+	printed sync.Once
 }
 
 func (t *text) PrintPosts(w io.Writer, ps domain.Posts) {
 	for _, p := range ps {
-		if !t.printed {
+		t.printed.Do(func() {
 			t.printVerticalLine(w)
-			t.printed = true
-		}
+		})
 		t.printPost(w, p)
 		t.printVerticalLine(w)
 	}
