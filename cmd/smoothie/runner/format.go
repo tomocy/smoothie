@@ -36,3 +36,7 @@ func (t *text) printPost(w io.Writer, p *domain.Post) {
 	}
 	fmt.Fprintf(w, " %s\n%s\n", p.CreatedAt.Format("2006/01/02 15:04"), p.Text)
 }
+
+type color struct {
+	printed bool
+}
