@@ -41,7 +41,7 @@ func (t *text) printPost(w io.Writer, p *domain.Post) {
 var (
 	driverColors = map[string]*colorPkg.Color{
 		"tumblr":  colorPkg.New(colorPkg.FgBlue),
-		"twitter": colorPkg.New(colorPkg.FgBlue),
+		"twitter": colorPkg.New(colorPkg.FgCyan),
 		"reddit":  colorPkg.New(colorPkg.FgRed),
 	}
 )
