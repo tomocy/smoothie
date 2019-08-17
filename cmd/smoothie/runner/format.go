@@ -48,16 +48,15 @@ var (
 )
 
 type color struct {
-	printed bool
-	inited  sync.Once
-	white   *colorPkg.Color
+	printed, inited sync.Once
+	white           *colorPkg.Color
 }
 
 func (c *color) PrintPosts(w io.Writer, ps domain.Posts) {
 	for _, p := range ps {
-		if !c.printed {
+		c.printed.Do(func() {
 			c.printVerticalLine(w)
-		}
+		})
 		c.printPost(w, p)
 		c.printVerticalLine(w)
 	}
