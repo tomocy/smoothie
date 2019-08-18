@@ -2,7 +2,10 @@ package infra
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/tomocy/deverr"
 	"golang.org/x/oauth2"
@@ -64,4 +67,18 @@ func (y *YouTube) authCodeURL() string {
 
 func (y *YouTube) handleAuthorizationRedirect() (*oauth2.Token, error) {
 	return y.oauth.handleRedirect(context.Background(), nil, "/smoothie/youtube/authorization")
+}
+
+func (y *YouTube) do(r oauth2Req, dst interface{}) error {
+	resp, err := r.do(context.Background(), y.oauth.cnf)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if http.StatusBadRequest <= resp.StatusCode {
+		return errors.New(resp.Status)
+	}
+
+	return json.NewDecoder(resp.Body).Decode(dst)
 }
