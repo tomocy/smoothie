@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -153,12 +152,7 @@ func (r *Reddit) loadConfig() (redditConfig, error) {
 }
 
 func (r *Reddit) authCodeURL() string {
-	r.setRandomState()
-	return r.oauth.cnf.AuthCodeURL(r.oauth.state, oauth2.SetAuthURLParam("duration", "permanent"))
-}
-
-func (r *Reddit) setRandomState() {
-	r.oauth.state = fmt.Sprintf("%d", rand.Intn(10000))
+	return r.oauth.authURL(oauth2.SetAuthURLParam("duration", "permanent"))
 }
 
 func (r *Reddit) handleAuthorizationRedirect() (*oauth2.Token, error) {
