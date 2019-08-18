@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"os/signal"
@@ -14,6 +15,14 @@ import (
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra"
 )
+
+func init() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s: [optinos] drivers...\n", os.Args[0])
+
+		flag.PrintDefaults()
+	}
+}
 
 func New() Runner {
 	cnf, err := parseConfig()
