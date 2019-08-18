@@ -90,6 +90,11 @@ func (c *color) init() {
 
 type html struct{}
 
+func joinHTML(name string) string {
+	dir := joinResource("html")
+	return filepath.Join(dir, name)
+}
+
 func joinResource(name string) string {
 	dir := filepath.Join(os.Getenv("GOPATH"), "/src/github.com/tomocy/smoothie/cmd/smoothie/resource")
 	return filepath.Join(dir, name)
