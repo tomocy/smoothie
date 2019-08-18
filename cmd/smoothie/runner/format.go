@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/buger/goterm"
 	colorPkg "github.com/fatih/color"
+	"github.com/tomocy/caster"
 	"github.com/tomocy/smoothie/domain"
 )
 
@@ -88,7 +90,33 @@ func (c *color) init() {
 	c.white = colorPkg.New(colorPkg.FgWhite)
 }
 
-type html struct{}
+type html struct {
+	inited sync.Once
+	caster caster.Caster
+}
+
+func (h *html) init() {
+	if err := h.initCaster(); err != nil {
+		log.Fatalf("failed for html to init caster: %s\n", err)
+	}
+}
+
+func (h *html) initCaster() error {
+	var err error
+	h.caster, err = caster.New(&caster.TemplateSet{
+		Filenames: []string{joinHTML("master.html")},
+	})
+	if err != nil {
+		return err
+	}
+	if err := h.caster.Extend("post.index", &caster.TemplateSet{
+		Filenames: []string{joinHTML("posts/index.html")},
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func joinHTML(name string) string {
 	dir := joinResource("html")
