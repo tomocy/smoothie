@@ -1,0 +1,9 @@
+{{ define "content" }}
+<ul>
+    {{ range .Posts }}
+    <li>
+        {{ .Text }}
+    </li>
+    {{ end }}
+</ul>
+{{ end }}
