@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tomocy/deverr"
 	"golang.org/x/oauth2"
@@ -48,4 +49,19 @@ func (y *YouTube) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan 
 
 func (y *YouTube) FetchPosts() (domain.Posts, error) {
 	return nil, deverr.NotImplemented
+}
+
+func (y *YouTube) retreiveAuthorization() (*oauth2.Token, error) {
+	url := y.authCodeURL()
+	fmt.Printf("youtube: open this link: %s\n", url)
+
+	return y.handleAuthorizationRedirect()
+}
+
+func (y *YouTube) authCodeURL() string {
+	return y.oauth.authURL()
+}
+
+func (y *YouTube) handleAuthorizationRedirect() (*oauth2.Token, error) {
+	return y.oauth.handleRedirect(context.Background(), nil, "/smoothie/youtube/authorization")
 }
