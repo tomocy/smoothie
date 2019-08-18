@@ -8,7 +8,9 @@ import (
 	"github.com/tomocy/smoothie/domain"
 )
 
-type YouTube struct{}
+type YouTube struct {
+	oauth oauth2Manager
+}
 
 func (y *YouTube) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
 	psCh, errCh := make(chan domain.Posts), make(chan error)
