@@ -1,9 +1,44 @@
 {{ define "content" }}
-<ul>
-    {{ range .Posts }}
-    <li>
-        {{ .Text }}
-    </li>
-    {{ end }}
-</ul>
+<div class="container">
+    <div class="row justify-content-center">
+        <ul class="col-12 col-sm-10 col-md-8 col-lg-6 py-5">
+            {{ range .Posts }}
+            <li class="list-group-item">
+                <div>
+                    <div class="row">
+                        <div class="col-7">
+                            <span id="driver-icon-{{ .Driver }}-{{ .ID }}"></span>
+                            {{ .User.Name }} {{ with .User.Username }} @{{ . }}{{ end }}
+                        </div>
+                        <div class=" col-5">
+                            <p class="text-right">{{ .CreatedAt.Format "2006/01/02 15:04" }}</p>
+                        </div>
+                    </div>
+                    <p class="text-break text-justify">
+                        {{ .Text }}
+                    </p>
+                </div>
+            </li>
+            {{ end }}
+        </ul>
+    </div>
+</div>
+
+<script>
+    const driverIcons = {
+        tumblr: '<i class="fab fa-tumblr" style="color:35465c;"></i>',
+        twitter: '<i class="fab fa-twitter" style="color:1da1f2;"></i>',
+        reddit: '<i class="fab fa-reddit" style="color:ff4500;"></i>',
+    }
+    const insertDriverIcons = (id, driver) => {
+        const elem = document.getElementById(id)
+        elem.innerHTML = driverIcons[driver]
+    }
+
+    const posts = {{ .Posts }}
+    for (const post of posts) {
+        const id = `driver-icon-${post.Driver}-${post.ID}`
+        insertDriverIcons(id, post.Driver)
+    }
+</script>
 {{ end }}
