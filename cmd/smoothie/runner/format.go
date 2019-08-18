@@ -3,6 +3,8 @@ package runner
 import (
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -87,3 +89,8 @@ func (c *color) init() {
 }
 
 type html struct{}
+
+func joinResource(name string) string {
+	dir := filepath.Join(os.Getenv("GOPATH"), "/src/github.com/tomocy/smoothie/cmd/smoothie/resource")
+	return filepath.Join(dir, name)
+}
