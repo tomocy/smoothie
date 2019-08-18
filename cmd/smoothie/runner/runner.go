@@ -61,7 +61,8 @@ type config struct {
 }
 
 const (
-	modeCLI = "cli"
+	modeCLI  = "cli"
+	modeHTTP = "http"
 
 	formatText  = "text"
 	formatColor = "color"
@@ -72,6 +73,10 @@ func newPresenter(mode, format string) presenter {
 	switch mode {
 	case modeCLI:
 		return &cli{
+			printer: newPrinter(format),
+		}
+	case modeHTTP:
+		return &http{
 			printer: newPrinter(format),
 		}
 	default:
