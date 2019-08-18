@@ -14,3 +14,7 @@ func (c *cli) ShowPosts(ps domain.Posts) {
 	ordered := orderPostsByOldest(ps)
 	c.printer.PrintPosts(os.Stdout, ordered)
 }
+
+type http struct {
+	printer printer
+}
