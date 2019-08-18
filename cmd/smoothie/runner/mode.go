@@ -1,6 +1,8 @@
 package runner
 
 import (
+	"fmt"
+	httpPkg "net/http"
 	"os"
 
 	"github.com/tomocy/smoothie/domain"
@@ -17,4 +19,19 @@ func (c *cli) ShowPosts(ps domain.Posts) {
 
 type http struct {
 	printer printer
+}
+
+func (h *http) ShowPosts(ps domain.Posts) {
+	httpPkg.HandleFunc("/", func(w httpPkg.ResponseWriter, r *httpPkg.Request) {
+		h.printer.PrintPosts(w, ps)
+	})
+	h.listenAndServe()
+}
+
+func (h *http) listenAndServe() {
+	addr := ":80"
+	fmt.Printf("listen and serve on %s\n", addr)
+	if err := httpPkg.ListenAndServe(addr, nil); err != nil {
+		fmt.Fprintf(os.Stderr, "failed for http to listen and serve: %s\n", err)
+	}
 }
