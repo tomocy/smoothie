@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -128,6 +129,11 @@ func (m *oauthManager) handlerForRedirect(ctx context.Context, credCh chan<- *oa
 type oauth2Manager struct {
 	state string
 	cnf   oauth2.Config
+}
+
+func (m *oauth2Manager) authURL(params ...oauth2.AuthCodeOption) string {
+	m.state = fmt.Sprintf("%d", rand.Intn(10000))
+	return m.cnf.AuthCodeURL(m.state, params...)
 }
 
 func (m *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.AuthCodeOption, path string) (*oauth2.Token, error) {
