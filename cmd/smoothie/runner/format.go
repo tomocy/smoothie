@@ -85,3 +85,5 @@ func (c *color) printPost(w io.Writer, p *domain.Post) {
 func (c *color) init() {
 	c.white = colorPkg.New(colorPkg.FgWhite)
 }
+
+type html struct{}
