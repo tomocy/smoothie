@@ -95,6 +95,13 @@ type html struct {
 	caster caster.Caster
 }
 
+func (h *html) PrintPosts(w io.Writer, ps domain.Posts) {
+	h.inited.Do(h.init)
+	h.caster.Cast(w, "post.index", map[string]interface{}{
+		"Posts": ps,
+	})
+}
+
 func (h *html) init() {
 	if err := h.initCaster(); err != nil {
 		log.Fatalf("failed for html to init caster: %s\n", err)
