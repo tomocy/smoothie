@@ -17,6 +17,9 @@ func NewYouTube(id, secret string) *YouTube {
 				ClientID: id, ClientSecret: secret,
 				RedirectURL: "http://localhost/smoothie/youtube/authorization",
 				Endpoint:    google.Endpoint,
+				Scopes: []string{
+					"https://www.googleapis.com/auth/youtube",
+				},
 			},
 		},
 	}
