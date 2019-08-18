@@ -65,6 +65,7 @@ const (
 
 	formatText  = "text"
 	formatColor = "color"
+	formatHTML  = "html"
 )
 
 func newPresenter(mode, format string) presenter {
@@ -88,6 +89,8 @@ func newPrinter(format string) printer {
 		return new(text)
 	case formatColor:
 		return new(color)
+	case formatHTML:
+		return new(html)
 	default:
 		return nil
 	}
