@@ -1,6 +1,7 @@
 package runner
 
 import (
+	jsonPkg "encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -136,3 +137,7 @@ func joinResource(name string) string {
 }
 
 type json struct{}
+
+func (j *json) PrintPosts(w io.Writer, ps domain.Posts) {
+	jsonPkg.NewEncoder(w).Encode(ps)
+}
