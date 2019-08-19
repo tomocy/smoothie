@@ -134,3 +134,5 @@ func joinResource(name string) string {
 	dir := filepath.Join(os.Getenv("GOPATH"), "/src/github.com/tomocy/smoothie/cmd/smoothie/resource")
 	return filepath.Join(dir, name)
 }
+
+type json struct{}
