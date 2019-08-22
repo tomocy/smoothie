@@ -2,9 +2,12 @@ package infra
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-
-	"google.golang.org/api/option"
+	"net/http"
+	"net/url"
+	"path/filepath"
 
 	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
@@ -51,7 +54,7 @@ func (g *Gmail) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan er
 }
 
 func (g *Gmail) FetchPosts() (domain.Posts, error) {
-	ms, err := g.fetchMessages()
+	ms, err := g.fetchMessages(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,25 +62,25 @@ func (g *Gmail) FetchPosts() (domain.Posts, error) {
 	return ms.Adapt(), nil
 }
 
-func (g *Gmail) fetchMessages() (gmail.Messages, error) {
+func (g *Gmail) fetchMessages(params url.Values) (gmail.Messages, error) {
 	tok, err := g.retreiveAuthorization()
 	if err != nil {
 		return nil, err
 	}
 
-	serv, err := g.gmailService(tok)
-	if err != nil {
-		return nil, err
+	assured := g.assureDefaultParams(params)
+	r := oauth2Req{
+		tok: tok, method: http.MethodGet, url: g.endpoint("/users/me/messages"), params: assured,
 	}
-	resp, err := serv.Users.Messages.List("me").MaxResults(10).Do()
-	if err != nil {
+	var resp *gmailLib.ListMessagesResponse
+	if err := g.do(r, &resp); err != nil {
 		g.resetAccessToken()
 		return nil, err
 	}
 	ms := make(gmail.Messages, len(resp.Messages))
 	for i, m := range resp.Messages {
-		m, err = serv.Users.Messages.Get("me", m.Id).Do()
-		if err != nil {
+		r.url = g.endpoint("/users/me/messages", m.Id)
+		if err := g.do(r, &m); err != nil {
 			g.resetAccessToken()
 			return nil, err
 		}
@@ -116,13 +119,6 @@ func (g *Gmail) handleAuthorizationRedirect() (*oauth2.Token, error) {
 	return g.oauth.handleRedirect(context.Background(), nil, "/smoothie/gmail/authorization")
 }
 
-func (g *Gmail) gmailService(tok *oauth2.Token) (*gmailLib.Service, error) {
-	ctx := context.Background()
-	return gmailLib.NewService(ctx, option.WithTokenSource(
-		g.oauth.cnf.TokenSource(ctx, tok),
-	))
-}
-
 func (g *Gmail) resetAccessToken() {
 	loaded, err := g.loadConfig()
 	if err != nil {
@@ -151,4 +147,35 @@ func (g *Gmail) saveConfig(cnf gmailConfig) error {
 	loaded.Gmail = cnf
 
 	return saveConfig(loaded)
+}
+
+func (g *Gmail) assureDefaultParams(params url.Values) url.Values {
+	assured := params
+	if assured == nil {
+		assured = make(url.Values)
+	}
+	assured.Set("maxResults", "5")
+
+	return assured
+}
+
+func (g *Gmail) do(r oauth2Req, dst interface{}) error {
+	resp, err := r.do(context.Background(), g.oauth.cnf)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if http.StatusBadRequest <= resp.StatusCode {
+		return errors.New(resp.Status)
+	}
+
+	return json.NewDecoder(resp.Body).Decode(dst)
+}
+
+func (g *Gmail) endpoint(ps ...string) string {
+	parsed, _ := url.Parse("https://www.googleapis.com/gmail/v1")
+	ss := append([]string{parsed.Path}, ps...)
+	parsed.Path = filepath.Join(ss...)
+	return parsed.String()
 }
