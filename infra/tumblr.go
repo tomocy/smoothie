@@ -128,7 +128,7 @@ func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
 		return cnf.AccessCredentials, nil
 	}
 
-	url, err := t.authorizationURL()
+	url, err := t.oauth.authURL(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -144,16 +144,6 @@ func (t *Tumblr) loadConfig() (tumblrConfig, error) {
 	}
 
 	return cnf.Tumblr, nil
-}
-
-func (t *Tumblr) authorizationURL() (string, error) {
-	temp, err := t.oauth.client.RequestTemporaryCredentials(http.DefaultClient, "", nil)
-	if err != nil {
-		return "", err
-	}
-	t.oauth.temp = temp
-
-	return t.oauth.client.AuthorizationURL(temp, nil), nil
 }
 
 func (t *Tumblr) handleAuthorizationRedirect() (*oauth.Credentials, error) {
