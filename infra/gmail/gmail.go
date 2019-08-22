@@ -5,6 +5,8 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
+type Messages []*Message
+
 type Message gmail.Message
 
 func (m *Message) Adapt() *domain.Post {
