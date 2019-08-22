@@ -234,6 +234,10 @@ type gmailConfig struct {
 	oauth2Config
 }
 
+func (g *gmailConfig) isZero() bool {
+	return g.oauth2Config.isZero()
+}
+
 type tumblrConfig struct {
 	oauthConfig
 }
