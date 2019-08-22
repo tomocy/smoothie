@@ -138,7 +138,7 @@ func (g *Gmail) retreiveAuthorization() (*oauth2.Token, error) {
 		return cnf.AccessToken, nil
 	}
 
-	url := g.oauth.authURL()
+	url := g.oauth.authURL(oauth2.AccessTypeOffline)
 	fmt.Printf("open this link: %s\n", url)
 
 	return g.handleAuthorizationRedirect()
