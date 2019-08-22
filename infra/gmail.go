@@ -57,6 +57,15 @@ func (g *Gmail) retreiveAuthorization() (*oauth2.Token, error) {
 	return g.handleAuthorizationRedirect()
 }
 
+func (g *Gmail) loadConfig() (gmailConfig, error) {
+	cnf, err := loadConfig()
+	if err != nil {
+		return gmailConfig{}, err
+	}
+
+	return cnf.Gmail, nil
+}
+
 func (g *Gmail) handleAuthorizationRedirect() (*oauth2.Token, error) {
 	return g.oauth.handleRedirect(context.Background(), nil, "/smoothie/gmail/authorization")
 }
