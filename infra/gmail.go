@@ -51,6 +51,10 @@ func (g *Gmail) FetchPosts() (domain.Posts, error) {
 }
 
 func (g *Gmail) retreiveAuthorization() (*oauth2.Token, error) {
+	if cnf, err := g.loadConfig(); err == nil && !cnf.isZero() {
+		return cnf.AccessToken, nil
+	}
+
 	url := g.oauth.authURL()
 	fmt.Printf("open this link: %s\n", url)
 
