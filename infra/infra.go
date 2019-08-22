@@ -259,11 +259,7 @@ type redditConfig struct {
 }
 
 func (c *redditConfig) isZero() bool {
-	if c.AccessToken != nil {
-		return false
-	}
-
-	return true
+	return c.oauth2Config.isZero()
 }
 
 type oauth2Config struct {
