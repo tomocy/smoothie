@@ -1,6 +1,9 @@
 package gmail
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/tomocy/smoothie/domain"
 	"google.golang.org/api/gmail/v1"
 )
@@ -9,13 +12,12 @@ type Messages []*Message
 
 func (ms Messages) Adapt() domain.Posts {
 	adapteds := make(domain.Posts, len(ms))
-	for i,m := range ms {
+	for i, m := range ms {
 		adapteds[i] = m.Adapt()
 	}
 
 	return adapteds
 }
-
 
 type Message gmail.Message
 
@@ -27,8 +29,8 @@ func (m *Message) Adapt() *domain.Post {
 		User: &domain.User{
 			Name: header.to,
 		},
-		Text: fmt.Sprintf("%s\n%s", header.from, header.subject),
-		CreatedAt: time.Unix(0, m.InternalDate*int64(time.Millisecond))
+		Text:      fmt.Sprintf("%s\n%s", header.from, header.subject),
+		CreatedAt: time.Unix(0, m.InternalDate*int64(time.Millisecond)),
 	}
 }
 
