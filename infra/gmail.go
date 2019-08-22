@@ -51,7 +51,12 @@ func (g *Gmail) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan er
 }
 
 func (g *Gmail) FetchPosts() (domain.Posts, error) {
-	return nil, deverr.NotImplemented
+	ms, err := g.fetchMessages()
+	if err != nil {
+		return nil, err
+	}
+
+	return ms.Adapt(), nil
 }
 
 func (g *Gmail) fetchMessages() (gmail.Messages, error) {
