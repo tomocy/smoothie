@@ -92,6 +92,16 @@ type oauthManager struct {
 	client oauth.Client
 }
 
+func (m *oauthManager) authURL(params url.Values) (string, error) {
+	temp, err := m.client.RequestTemporaryCredentials(http.DefaultClient, "", params)
+	if err != nil {
+		return "", err
+	}
+	m.temp = temp
+
+	return m.client.AuthorizationURL(temp, params), nil
+}
+
 func (m *oauthManager) handleRedirect(ctx context.Context, path string) (*oauth.Credentials, error) {
 	credCh, errCh := make(chan *oauth.Credentials), make(chan error)
 	go func() {
