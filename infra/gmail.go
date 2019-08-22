@@ -138,5 +138,5 @@ func (g *Gmail) saveConfig(cnf gmailConfig) error {
 	}
 	loaded.Gmail = cnf
 
-	return nil
+	return saveConfig(loaded)
 }
