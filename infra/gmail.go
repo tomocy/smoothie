@@ -1,3 +1,5 @@
 package infra
 
-type Gmail struct{}
+type Gmail struct {
+	oauth oauth2Manager
+}
