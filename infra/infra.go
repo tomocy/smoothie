@@ -230,6 +230,10 @@ type config struct {
 	Reddit  redditConfig  `json:"reddit"`
 }
 
+type gmailConfig struct {
+	oauth2Config
+}
+
 type tumblrConfig struct {
 	oauthConfig
 }
