@@ -112,6 +112,16 @@ func (g *Gmail) gmailService(tok *oauth2.Token) (*gmailLib.Service, error) {
 	))
 }
 
+func (g *Gmail) saveAccessToken(tok *oauth2.Token) error {
+	cnf, err := g.loadConfig()
+	if err != nil {
+		return err
+	}
+	cnf.AccessToken = tok
+
+	return nil
+}
+
 func (g *Gmail) saveConfig(cnf gmailConfig) error {
 	loaded, err := loadConfig()
 	if err != nil {
