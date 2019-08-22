@@ -79,6 +79,10 @@ func (g *Gmail) fetchMessages(params url.Values) (gmail.Messages, error) {
 		casteds[i] = &casted
 	}
 
+	if err := g.saveAccessToken(tok); err != nil {
+		return nil, err
+	}
+
 	return casteds, nil
 }
 
