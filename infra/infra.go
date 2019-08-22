@@ -41,12 +41,13 @@ func createWorkspace() error {
 		return err
 	}
 
-	f, err := os.Create(name)
+	f, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0700)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	return f.Close()
+	return json.NewEncoder(f).Encode(config{})
 }
 
 type oauthReq struct {
