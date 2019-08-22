@@ -4,10 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/api/option"
+
 	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
+	"github.com/tomocy/smoothie/infra/gmail"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	gmailLib "google.golang.org/api/gmail/v1"
 )
 
 func NewGmail(id, secret string) *Gmail {
@@ -50,6 +54,33 @@ func (g *Gmail) FetchPosts() (domain.Posts, error) {
 	return nil, deverr.NotImplemented
 }
 
+func (g *Gmail) fetchMessages() (gmail.Messages, error) {
+	tok, err := g.retreiveAuthorization()
+	if err != nil {
+		return nil, err
+	}
+
+	serv, err := g.gmailService(tok)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := serv.Users.Messages.List("me").MaxResults(10).Do()
+	if err != nil {
+		return nil, err
+	}
+	ms := make(gmail.Messages, len(resp.Messages))
+	for i, m := range resp.Messages {
+		m, err = serv.Users.Messages.Get("me", m.Id).Do()
+		if err != nil {
+			return nil, err
+		}
+		casted := gmail.Message(*m)
+		ms[i] = &casted
+	}
+
+	return ms, nil
+}
+
 func (g *Gmail) retreiveAuthorization() (*oauth2.Token, error) {
 	if cnf, err := g.loadConfig(); err == nil && !cnf.isZero() {
 		return cnf.AccessToken, nil
@@ -72,4 +103,11 @@ func (g *Gmail) loadConfig() (gmailConfig, error) {
 
 func (g *Gmail) handleAuthorizationRedirect() (*oauth2.Token, error) {
 	return g.oauth.handleRedirect(context.Background(), nil, "/smoothie/gmail/authorization")
+}
+
+func (g *Gmail) gmailService(tok *oauth2.Token) (*gmailLib.Service, error) {
+	ctx := context.Background()
+	return gmailLib.NewService(ctx, option.WithTokenSource(
+		g.oauth.cnf.TokenSource(ctx, tok),
+	))
 }
