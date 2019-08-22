@@ -29,7 +29,7 @@ func (m *Message) Adapt() *domain.Post {
 		User: &domain.User{
 			Name: header.to,
 		},
-		Text:      fmt.Sprintf("%s\n%s", header.from, header.subject),
+		Text:      fmt.Sprintf("%s %s\n", header.from, header.subject),
 		CreatedAt: time.Unix(0, m.InternalDate*int64(time.Millisecond)),
 	}
 }
