@@ -41,12 +41,13 @@ func createWorkspace() error {
 		return err
 	}
 
-	f, err := os.Create(name)
+	f, err := os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0700)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	return f.Close()
+	return json.NewEncoder(f).Encode(config{})
 }
 
 type oauthReq struct {
@@ -225,9 +226,18 @@ func saveConfig(cnf config) error {
 }
 
 type config struct {
+	Gmail   gmailConfig   `json:"gmail"`
 	Tumblr  tumblrConfig  `json:"tumblr"`
 	Twitter twitterConfig `json:"twitter"`
 	Reddit  redditConfig  `json:"reddit"`
+}
+
+type gmailConfig struct {
+	oauth2Config
+}
+
+func (g *gmailConfig) isZero() bool {
+	return g.oauth2Config.isZero()
 }
 
 type tumblrConfig struct {
@@ -258,11 +268,15 @@ type redditConfig struct {
 	oauth2Config
 }
 
+func (c *redditConfig) isZero() bool {
+	return c.oauth2Config.isZero()
+}
+
 type oauth2Config struct {
 	AccessToken *oauth2.Token `json:"access_token"`
 }
 
-func (c *redditConfig) isZero() bool {
+func (c *oauth2Config) isZero() bool {
 	if c.AccessToken != nil {
 		return false
 	}
