@@ -134,7 +134,7 @@ func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, er
 }
 
 func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
-	if cnf, err := t.loadConfig(); err == nil {
+	if cnf, err := t.loadConfig(); err == nil && !cnf.isZero() {
 		return cnf.AccessCredentials, nil
 	}
 
