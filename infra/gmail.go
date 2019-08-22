@@ -7,7 +7,23 @@ import (
 	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
+
+func NewGmail(id, secret string) *Gmail {
+	return &Gmail{
+		oauth: oauth2Manager{
+			cnf: oauth2.Config{
+				ClientID: id, ClientSecret: secret,
+				RedirectURL: "http://localhost/smoothie/gmail/authorization",
+				Endpoint:    google.Endpoint,
+				Scopes: []string{
+					"https://www.googleapis.com/auth/gmail.readonly",
+				},
+			},
+		},
+	}
+}
 
 type Gmail struct {
 	oauth oauth2Manager
