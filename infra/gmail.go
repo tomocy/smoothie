@@ -71,12 +71,14 @@ func (g *Gmail) fetchMessages() (gmail.Messages, error) {
 	}
 	resp, err := serv.Users.Messages.List("me").MaxResults(10).Do()
 	if err != nil {
+		g.resetAccessToken()
 		return nil, err
 	}
 	ms := make(gmail.Messages, len(resp.Messages))
 	for i, m := range resp.Messages {
 		m, err = serv.Users.Messages.Get("me", m.Id).Do()
 		if err != nil {
+			g.resetAccessToken()
 			return nil, err
 		}
 		casted := gmail.Message(*m)
@@ -119,6 +121,16 @@ func (g *Gmail) gmailService(tok *oauth2.Token) (*gmailLib.Service, error) {
 	return gmailLib.NewService(ctx, option.WithTokenSource(
 		g.oauth.cnf.TokenSource(ctx, tok),
 	))
+}
+
+func (g *Gmail) resetAccessToken() {
+	loaded, err := g.loadConfig()
+	if err != nil {
+		return
+	}
+	loaded.AccessToken = nil
+
+	g.saveConfig(loaded)
 }
 
 func (g *Gmail) saveAccessToken(tok *oauth2.Token) error {
