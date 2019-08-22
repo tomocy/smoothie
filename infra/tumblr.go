@@ -132,7 +132,7 @@ func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("open this url: %s\n", url)
+	fmt.Printf("tumblr: open this url: %s\n", url)
 
 	return t.handleAuthorizationRedirect()
 }
