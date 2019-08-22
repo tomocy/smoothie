@@ -39,16 +39,37 @@ func (m *Message) Adapt() *domain.Post {
 func (m *Message) joinText(h *header) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "%s %s", h.from, h.subject)
-	if h.mime != "text/plain" {
+	if h.mime != "text/plain" && h.mime != "multipart/alternative" {
 		return b.String()
 	}
 
-	decoded, err := base64.URLEncoding.DecodeString(m.Payload.Body.Data)
-	if err != nil {
-		return b.String()
+	var ss []string
+	if h.mime == "text/plain" {
+		ss = append(ss, m.Payload.Body.Data)
+	} else {
+		for _, p := range m.Payload.Parts {
+			if p.MimeType != "text/plain" {
+				continue
+			}
+			ss = append(ss, p.Body.Data)
+		}
 	}
+
 	b.WriteByte('\n')
-	b.Write(decoded)
+	b.WriteString(decodeBase64URLString(ss...))
+
+	return b.String()
+}
+
+func decodeBase64URLString(ss ...string) string {
+	var b strings.Builder
+	for _, s := range ss {
+		decoded, err := base64.URLEncoding.DecodeString(s)
+		if err != nil {
+			return ""
+		}
+		b.Write(decoded)
+	}
 
 	return b.String()
 }
