@@ -111,3 +111,13 @@ func (g *Gmail) gmailService(tok *oauth2.Token) (*gmailLib.Service, error) {
 		g.oauth.cnf.TokenSource(ctx, tok),
 	))
 }
+
+func (g *Gmail) saveConfig(cnf gmailConfig) error {
+	loaded, err := loadConfig()
+	if err != nil {
+		return err
+	}
+	loaded.Gmail = cnf
+
+	return nil
+}
