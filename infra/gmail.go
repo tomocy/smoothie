@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
-	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/gmail"
 	"golang.org/x/oauth2"
@@ -37,20 +37,67 @@ type Gmail struct {
 }
 
 func (g *Gmail) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
-	psCh, errCh := make(chan domain.Posts), make(chan error)
+	msCh, errCh := g.streamMessages(ctx, nil)
+	ch := make(chan domain.Posts)
 	go func() {
-		defer func() {
-			close(psCh)
-			close(errCh)
-		}()
-		select {
-		case <-ctx.Done():
-		default:
-			errCh <- deverr.NotImplemented
+		defer close(ch)
+		for ms := range msCh {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				ch <- ms.Adapt()
+			}
 		}
 	}()
 
-	return psCh, errCh
+	return ch, errCh
+}
+
+func (g *Gmail) streamMessages(ctx context.Context, params url.Values) (<-chan gmail.Messages, <-chan error) {
+	msCh, errCh := make(chan gmail.Messages), make(chan error)
+	go func() {
+		defer func() {
+			close(msCh)
+			close(errCh)
+		}()
+
+		lastCreatedAt := g.fetchAndSendMessages(params, msCh, errCh)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(5 * time.Minute):
+				if !lastCreatedAt.IsZero() {
+					if params == nil {
+						params = make(url.Values)
+					}
+					params.Set("q", fmt.Sprintf("newer:%s", lastCreatedAt.Format("2006/01/02 15:04")))
+				}
+				if createdAt := g.fetchAndSendMessages(params, msCh, errCh); !createdAt.IsZero() {
+					lastCreatedAt = createdAt
+				}
+			}
+		}
+	}()
+
+	return msCh, errCh
+}
+
+func (g *Gmail) fetchAndSendMessages(params url.Values, msCh chan<- gmail.Messages, errCh chan<- error) time.Time {
+	ms, err := g.fetchMessages(params)
+	if err != nil {
+		errCh <- err
+		return time.Time{}
+	}
+	if len(ms) <= 0 {
+		return time.Time{}
+	}
+
+	lastCreatedAt := time.Unix(0, ms[0].InternalDate*int64(time.Millisecond))
+	msCh <- ms
+
+	return lastCreatedAt
 }
 
 func (g *Gmail) FetchPosts() (domain.Posts, error) {
