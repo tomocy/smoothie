@@ -258,11 +258,19 @@ type redditConfig struct {
 	oauth2Config
 }
 
+func (c *redditConfig) isZero() bool {
+	if c.AccessToken != nil {
+		return false
+	}
+
+	return true
+}
+
 type oauth2Config struct {
 	AccessToken *oauth2.Token `json:"access_token"`
 }
 
-func (c *redditConfig) isZero() bool {
+func (c *oauth2Config) isZero() bool {
 	if c.AccessToken != nil {
 		return false
 	}
