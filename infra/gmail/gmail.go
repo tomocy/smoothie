@@ -7,6 +7,16 @@ import (
 
 type Messages []*Message
 
+func (ms Messages) Adapt() domain.Posts {
+	adapteds := make(domain.Posts, len(ms))
+	for i,m := range ms {
+		adapteds[i] = m.Adapt()
+	}
+
+	return adapteds
+}
+
+
 type Message gmail.Message
 
 func (m *Message) Adapt() *domain.Post {
