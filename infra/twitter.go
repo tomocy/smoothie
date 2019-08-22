@@ -16,20 +16,22 @@ import (
 
 func NewTwitter(id, secret string) *Twitter {
 	return &Twitter{
-		oauthClient: oauth.Client{
-			TemporaryCredentialRequestURI: "https://api.twitter.com/oauth/request_token",
-			ResourceOwnerAuthorizationURI: "https://api.twitter.com/oauth/authenticate",
-			TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
-			Credentials: oauth.Credentials{
-				Token:  id,
-				Secret: secret,
+		oauth: oauthManager{
+			client: oauth.Client{
+				TemporaryCredentialRequestURI: "https://api.twitter.com/oauth/request_token",
+				ResourceOwnerAuthorizationURI: "https://api.twitter.com/oauth/authenticate",
+				TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
+				Credentials: oauth.Credentials{
+					Token:  id,
+					Secret: secret,
+				},
 			},
 		},
 	}
 }
 
 type Twitter struct {
-	oauthClient oauth.Client
+	oauth oauthManager
 }
 
 func (t *Twitter) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
@@ -138,7 +140,7 @@ func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
 		return cnf.AccessCredentials, nil
 	}
 
-	temp, err := t.oauthClient.RequestTemporaryCredentials(http.DefaultClient, "", nil)
+	temp, err := t.oauth.client.RequestTemporaryCredentials(http.DefaultClient, "", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -156,14 +158,14 @@ func (t *Twitter) loadConfig() (twitterConfig, error) {
 }
 
 func (t *Twitter) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Credentials, error) {
-	url := t.oauthClient.AuthorizationURL(temp, nil)
+	url := t.oauth.client.AuthorizationURL(temp, nil)
 	fmt.Println("twitter: open this url: ", url)
 
 	fmt.Print("PIN: ")
 	var pin string
 	fmt.Scanln(&pin)
 
-	token, _, err := t.oauthClient.RequestToken(http.DefaultClient, temp, pin)
+	token, _, err := t.oauth.client.RequestToken(http.DefaultClient, temp, pin)
 	return token, err
 }
 
@@ -179,7 +181,7 @@ func (t *Twitter) assureDefaultParams(params url.Values) url.Values {
 }
 
 func (t *Twitter) do(r oauthReq, dst interface{}) error {
-	resp, err := r.do(t.oauthClient)
+	resp, err := r.do(t.oauth.client)
 	if err != nil {
 		return err
 	}
