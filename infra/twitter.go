@@ -157,7 +157,7 @@ func (t *Twitter) loadConfig() (twitterConfig, error) {
 
 func (t *Twitter) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Credentials, error) {
 	url := t.oauthClient.AuthorizationURL(temp, nil)
-	fmt.Println("open this url: ", url)
+	fmt.Println("twitter: open this url: ", url)
 
 	fmt.Print("PIN: ")
 	var pin string
