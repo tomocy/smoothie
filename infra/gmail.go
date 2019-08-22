@@ -68,31 +68,18 @@ func (g *Gmail) fetchMessages(params url.Values) (gmail.Messages, error) {
 		return nil, err
 	}
 
-	assured := g.assureDefaultParams(params)
-	r := oauth2Req{
-		tok: tok, method: http.MethodGet, url: g.endpoint("/users/me/messages"), params: assured,
-	}
-	var resp *gmailLib.ListMessagesResponse
-	if err := g.do(r, &resp); err != nil {
+	ms, err := g.listAndGetMessages(tok, params)
+	if err != nil {
 		g.resetAccessToken()
 		return nil, err
 	}
-	ms := make(gmail.Messages, len(resp.Messages))
-	for i, m := range resp.Messages {
-		r.url = g.endpoint("/users/me/messages", m.Id)
-		if err := g.do(r, &m); err != nil {
-			g.resetAccessToken()
-			return nil, err
-		}
+	casteds := make(gmail.Messages, len(ms))
+	for i, m := range ms {
 		casted := gmail.Message(*m)
-		ms[i] = &casted
+		casteds[i] = &casted
 	}
 
-	if err := g.saveAccessToken(tok); err != nil {
-		return nil, err
-	}
-
-	return ms, nil
+	return casteds, nil
 }
 
 func (g *Gmail) retreiveAuthorization() (*oauth2.Token, error) {
@@ -117,6 +104,27 @@ func (g *Gmail) loadConfig() (gmailConfig, error) {
 
 func (g *Gmail) handleAuthorizationRedirect() (*oauth2.Token, error) {
 	return g.oauth.handleRedirect(context.Background(), nil, "/smoothie/gmail/authorization")
+}
+
+func (g *Gmail) listAndGetMessages(tok *oauth2.Token, params url.Values) ([]*gmailLib.Message, error) {
+	assured := g.assureDefaultParams(params)
+	r := oauth2Req{
+		tok: tok, method: http.MethodGet, url: g.endpoint("/users/me/messages"), params: assured,
+	}
+	var resp *gmailLib.ListMessagesResponse
+	if err := g.do(r, &resp); err != nil {
+		g.resetAccessToken()
+		return nil, err
+	}
+	for _, m := range resp.Messages {
+		r.url = g.endpoint("/users/me/messages", m.Id)
+		if err := g.do(r, &m); err != nil {
+			g.resetAccessToken()
+			return nil, err
+		}
+	}
+
+	return resp.Messages, nil
 }
 
 func (g *Gmail) resetAccessToken() {
