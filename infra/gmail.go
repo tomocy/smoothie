@@ -128,7 +128,7 @@ func (g *Gmail) saveAccessToken(tok *oauth2.Token) error {
 	}
 	cnf.AccessToken = tok
 
-	return nil
+	return g.saveConfig(cnf)
 }
 
 func (g *Gmail) saveConfig(cnf gmailConfig) error {
