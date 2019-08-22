@@ -19,7 +19,7 @@ func NewTwitter(id, secret string) *Twitter {
 		oauth: oauthManager{
 			client: oauth.Client{
 				TemporaryCredentialRequestURI: "https://api.twitter.com/oauth/request_token",
-				ResourceOwnerAuthorizationURI: "https://api.twitter.com/oauth/authenticate",
+				ResourceOwnerAuthorizationURI: "https://api.twitter.com/oauth/authorize",
 				TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
 				Credentials: oauth.Credentials{
 					Token:  id,
@@ -140,12 +140,15 @@ func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
 		return cnf.AccessCredentials, nil
 	}
 
-	temp, err := t.oauth.client.RequestTemporaryCredentials(http.DefaultClient, "", nil)
+	url, err := t.oauth.authURL(url.Values{
+		"oauth_callback": []string{"http://localhost/smoothie/twitter/authorization"},
+	})
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("twitter: open this url: %s\n", url)
 
-	return t.requestClientAuthorization(temp)
+	return t.handleAuthorizationRedirect()
 }
 
 func (t *Twitter) loadConfig() (twitterConfig, error) {
@@ -157,16 +160,8 @@ func (t *Twitter) loadConfig() (twitterConfig, error) {
 	return cnf.Twitter, nil
 }
 
-func (t *Twitter) requestClientAuthorization(temp *oauth.Credentials) (*oauth.Credentials, error) {
-	url := t.oauth.client.AuthorizationURL(temp, nil)
-	fmt.Println("twitter: open this url: ", url)
-
-	fmt.Print("PIN: ")
-	var pin string
-	fmt.Scanln(&pin)
-
-	token, _, err := t.oauth.client.RequestToken(http.DefaultClient, temp, pin)
-	return token, err
+func (t *Twitter) handleAuthorizationRedirect() (*oauth.Credentials, error) {
+	return t.oauth.handleRedirect(context.Background(), "/smoothie/twitter/authorization")
 }
 
 func (t *Twitter) assureDefaultParams(params url.Values) url.Values {
