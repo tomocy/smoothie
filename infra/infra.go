@@ -104,13 +104,16 @@ func (m *oauthManager) authURL(params url.Values) (string, error) {
 
 func (m *oauthManager) handleRedirect(ctx context.Context, path string) (*oauth.Credentials, error) {
 	credCh, errCh := make(chan *oauth.Credentials), make(chan error)
+	var srv http.Server
+	defer srv.Shutdown(ctx)
 	go func() {
 		defer func() {
 			close(credCh)
 			close(errCh)
 		}()
+
 		http.Handle(path, m.handlerForRedirect(ctx, credCh, errCh))
-		if err := http.ListenAndServe(":80", nil); err != nil {
+		if err := srv.ListenAndServe(); err != nil {
 			errCh <- err
 		}
 	}()
