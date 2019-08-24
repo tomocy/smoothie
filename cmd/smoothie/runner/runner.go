@@ -57,23 +57,20 @@ type Runner interface {
 
 func parseConfig() (config, error) {
 	v, m, f := flag.String("v", verbFetch, "verb"), flag.String("m", modeCLI, "name of mode"), flag.String("f", formatText, "format")
-	s, clean := flag.Bool("s", false, "enable streaming"), flag.Bool("clean", false, "clean workspace")
 	env := flag.String("env", "./.env", "the path to .env")
 	flag.Parse()
 
 	return config{
 		verb: *v, mode: *m, format: *f,
-		isStreaming: *s, isClean: *clean,
 		envFilename: *env,
 		drivers:     flag.Args(),
 	}, nil
 }
 
 type config struct {
-	verb, mode, format   string
-	isStreaming, isClean bool
-	envFilename          string
-	drivers              []string
+	verb, mode, format string
+	envFilename        string
+	drivers            []string
 }
 
 const (
