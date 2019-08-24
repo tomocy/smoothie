@@ -6,6 +6,10 @@ client for various social media
 go install github.com/tomocy/smoothie/cmd/smoothie
 ```
 
+## Prerequisites
+- Register an app in social media you want to use as the drivers and Keep the Client ID and Secert
+- Set the IDs and Secrets in your env or in .env file located anywhere (default: current directory) ([.env example](.env.example))
+
 ## Usage
 ```
 Usage of smoothie: [optinos] drivers...
