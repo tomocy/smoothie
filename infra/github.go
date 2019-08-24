@@ -36,6 +36,35 @@ func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 	return psCh, errCh
 }
 
+func (g *GitHub) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan github.Issues, <-chan error) {
+	isCh, errCh := make(chan github.Issues), make(chan error)
+	go func() {
+		defer func() {
+			close(isCh)
+			close(errCh)
+		}()
+		lastCreatedAt := g.fetchAndSendIssues(owner, repo, params, isCh, errCh)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(5 * time.Minute):
+				if !lastCreatedAt.IsZero() {
+					if params == nil {
+						params = make(url.Values)
+					}
+					params.Set("since", lastCreatedAt.Format(time.RFC3339))
+				}
+				if createdAt := g.fetchAndSendIssues(owner, repo, params, isCh, errCh); !createdAt.IsZero() {
+					lastCreatedAt = createdAt
+				}
+			}
+		}
+	}()
+
+	return isCh, errCh
+}
+
 func (g *GitHub) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- github.Issues, errCh chan<- error) time.Time {
 	is, err := g.fetchIssues(owner, repo, params)
 	if err != nil {
