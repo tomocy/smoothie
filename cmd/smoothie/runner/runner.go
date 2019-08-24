@@ -183,7 +183,7 @@ func newPostUsecase() *app.PostUsecase {
 	rs["gmail"] = infra.NewGmail("840774204831-aqpeh6dt6d9v1jbks7iilgpkcfliigtd.apps.googleusercontent.com", "fVHGfRA8I5iubiIJPsI2SpZw")
 	rs["tumblr"] = infra.NewTumblr(idAndSecret("tumblr"))
 	rs["twitter"] = infra.NewTwitter(idAndSecret("twitter"))
-	rs["reddit"] = infra.NewReddit("ykZikE5-hzb6QQ", "5Kxg4rZkY0Wk8-xjzz8vH11xlW8")
+	rs["reddit"] = infra.NewReddit(idAndSecret("reddit"))
 
 	return app.NewPostUsecase(rs)
 }
