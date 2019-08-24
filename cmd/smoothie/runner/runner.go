@@ -63,10 +63,10 @@ func parseConfig() (config, error) {
 }
 
 type config struct {
-	mode, format string
-	isStreaming  bool
-	envFilename  string
-	drivers      []string
+	mode, format         string
+	isStreaming, isClean bool
+	envFilename          string
+	drivers              []string
 }
 
 const (
