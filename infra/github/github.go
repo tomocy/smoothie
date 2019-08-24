@@ -9,6 +9,15 @@ import (
 
 type Issues []*Issue
 
+func (is Issues) Adapt() domain.Posts {
+	adapteds := make(domain.Posts, len(is))
+	for j, i := range is {
+		adapteds[j] = i.Adapt()
+	}
+
+	return adapteds
+}
+
 type Issue struct {
 	ID        int       `json:"id"`
 	User      *User     `json:"user"`
@@ -19,9 +28,10 @@ type Issue struct {
 
 func (i *Issue) Adapt() *domain.Post {
 	return &domain.Post{
-		ID: fmt.Sprint(i.ID),
+		ID:     fmt.Sprint(i.ID),
+		Driver: "github",
 		User: &domain.User{
-			Name: i.User.Login,
+			Username: i.User.Login,
 		},
 		Text:      fmt.Sprintf("%s\n%s", i.Title, i.Body),
 		CreatedAt: i.CreatedAt,
