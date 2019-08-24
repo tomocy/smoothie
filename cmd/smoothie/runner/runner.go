@@ -180,7 +180,7 @@ func (h *Help) Run() error {
 
 func newPostUsecase() *app.PostUsecase {
 	rs := make(map[string]domain.PostRepo)
-	rs["gmail"] = infra.NewGmail("840774204831-aqpeh6dt6d9v1jbks7iilgpkcfliigtd.apps.googleusercontent.com", "fVHGfRA8I5iubiIJPsI2SpZw")
+	rs["gmail"] = infra.NewGmail(idAndSecret("gmail"))
 	rs["tumblr"] = infra.NewTumblr(idAndSecret("tumblr"))
 	rs["twitter"] = infra.NewTwitter(idAndSecret("twitter"))
 	rs["reddit"] = infra.NewReddit(idAndSecret("reddit"))
