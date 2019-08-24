@@ -174,6 +174,18 @@ type Fetch struct {
 	presenter presenter
 }
 
+func (f *Fetch) Run() error {
+	u := newPostUsecase()
+	ps, err := u.FetchPostsOfDrivers(f.cnf.drivers...)
+	if err != nil {
+		return err
+	}
+
+	f.presenter.ShowPosts(ps)
+
+	return nil
+}
+
 func orderPostsByOldest(ps domain.Posts) domain.Posts {
 	ordered := make(domain.Posts, len(ps))
 	copy(ordered, ps)
