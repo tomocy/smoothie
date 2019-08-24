@@ -179,11 +179,12 @@ func (h *Help) Run() error {
 }
 
 func newPostUsecase() *app.PostUsecase {
-	rs := make(map[string]domain.PostRepo)
-	rs["gmail"] = infra.NewGmail(idAndSecret("gmail"))
-	rs["tumblr"] = infra.NewTumblr(idAndSecret("tumblr"))
-	rs["twitter"] = infra.NewTwitter(idAndSecret("twitter"))
-	rs["reddit"] = infra.NewReddit(idAndSecret("reddit"))
+	rs := map[string]domain.PostRepo{
+		"gmail":   infra.NewGmail(idAndSecret("gmail")),
+		"tumblr":  infra.NewTumblr(idAndSecret("tumblr")),
+		"twitter": infra.NewTwitter(idAndSecret("twitter")),
+		"reddit":  infra.NewReddit(idAndSecret("reddit")),
+	}
 
 	return app.NewPostUsecase(rs)
 }
