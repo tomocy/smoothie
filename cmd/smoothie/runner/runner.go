@@ -182,7 +182,7 @@ func newPostUsecase() *app.PostUsecase {
 	rs := make(map[string]domain.PostRepo)
 	rs["gmail"] = infra.NewGmail("840774204831-aqpeh6dt6d9v1jbks7iilgpkcfliigtd.apps.googleusercontent.com", "fVHGfRA8I5iubiIJPsI2SpZw")
 	rs["tumblr"] = infra.NewTumblr("X1hXFvNpKJV970oW6e16bVhFO2NZFc0gsoYurCRyDraZTVgFXx", "mJ65S3oQ569Vp40MFaagQNizGTxEYA7Uj9ayEpfk2AlY5HRvVC")
-	rs["tumblr"] = infra.NewTumblr("X1hXFvNpKJV970oW6e16bVhFO2NZFc0gsoYurCRyDraZTVgFXx", "mJ65S3oQ569Vp40MFaagQNizGTxEYA7Uj9ayEpfk2AlY5HRvVC")
+	rs["tumblr"] = infra.NewTumblr(idAndSecret("tumblr"))
 	rs["twitter"] = infra.NewTwitter(idAndSecret("twitter"))
 	rs["reddit"] = infra.NewReddit("ykZikE5-hzb6QQ", "5Kxg4rZkY0Wk8-xjzz8vH11xlW8")
 
