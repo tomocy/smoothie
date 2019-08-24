@@ -35,7 +35,7 @@ func New() Runner {
 		}
 	}
 
-	godotenv.Load()
+	godotenv.Load(cnf.envFilename)
 
 	return &Continue{
 		cnf:       cnf,
