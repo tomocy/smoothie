@@ -11,6 +11,7 @@ import (
 	"github.com/tomocy/deverr"
 
 	"github.com/tomocy/smoothie/domain"
+	"github.com/tomocy/smoothie/infra/github"
 )
 
 type GitHub struct{}
@@ -36,6 +37,17 @@ func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 
 func (g *GitHub) FetchPosts() (domain.Posts, error) {
 	return nil, deverr.NotImplemented
+}
+
+func (g *GitHub) fetchIssues(owner, repo string, params url.Values) (github.Issues, error) {
+	var is github.Issues
+	if err := g.do(req{
+		method: http.MethodGet, url: g.endpoint("repos", owner, repo, "issues"), params: params,
+	}); err != nil {
+		return nil, err
+	}
+
+	return is, nil
 }
 
 func (g *GitHub) do(r req, dst interface{}) error {
