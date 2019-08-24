@@ -11,6 +11,8 @@ import (
 	"sort"
 	"syscall"
 
+	"github.com/joho/godotenv"
+
 	"github.com/tomocy/smoothie/app"
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra"
@@ -31,6 +33,8 @@ func New() Runner {
 			err: err,
 		}
 	}
+
+	godotenv.Load()
 
 	return &Continue{
 		cnf:       cnf,
