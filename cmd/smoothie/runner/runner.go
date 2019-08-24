@@ -172,6 +172,8 @@ func orderPostsByOldest(ps domain.Posts) domain.Posts {
 	return ordered
 }
 
+type Clean struct{}
+
 type Help struct {
 	err error
 }
