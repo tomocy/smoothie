@@ -33,7 +33,7 @@ func createWorkspace() error {
 		return nil
 	}
 
-	dir := workspaceName()
+	dir := WorkspaceName()
 	if err := os.RemoveAll(dir); err != nil {
 		return err
 	}
@@ -295,9 +295,9 @@ func (c *oauth2Config) isZero() bool {
 }
 
 func configFilename() string {
-	return filepath.Join(workspaceName(), "config.json")
+	return filepath.Join(WorkspaceName(), "config.json")
 }
 
-func workspaceName() string {
+func WorkspaceName() string {
 	return filepath.Join(os.Getenv("HOME"), ".smoothie")
 }
