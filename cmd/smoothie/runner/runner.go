@@ -35,6 +35,9 @@ func New() Runner {
 			err: err,
 		}
 	}
+	if cnf.isClean {
+		return new(Clean)
+	}
 
 	godotenv.Load(cnf.envFilename)
 
