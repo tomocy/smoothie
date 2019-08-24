@@ -2,6 +2,9 @@ package infra
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
 	"net/url"
 	"path/filepath"
 
@@ -33,6 +36,20 @@ func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 
 func (g *GitHub) FetchPosts() (domain.Posts, error) {
 	return nil, deverr.NotImplemented
+}
+
+func (g *GitHub) do(r req, dst interface{}) error {
+	resp, err := r.do()
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if http.StatusBadRequest <= resp.StatusCode {
+		return errors.New(resp.Status)
+	}
+
+	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
 func (g *GitHub) endpoint(ps ...string) string {
