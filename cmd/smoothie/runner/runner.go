@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sort"
 	"strings"
 	"syscall"
@@ -173,6 +174,10 @@ func orderPostsByOldest(ps domain.Posts) domain.Posts {
 }
 
 type Clean struct{}
+
+func (c *Clean) Run() error {
+	return os.RemoveAll(filepath.Join(os.Getenv("HOME"), ".smoothie"))
+}
 
 type Help struct {
 	err error
