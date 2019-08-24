@@ -2,6 +2,8 @@ package infra
 
 import (
 	"context"
+	"net/url"
+	"path/filepath"
 
 	"github.com/tomocy/deverr"
 
@@ -31,4 +33,11 @@ func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 
 func (g *GitHub) FetchPosts() (domain.Posts, error) {
 	return nil, deverr.NotImplemented
+}
+
+func (g *GitHub) endpoint(ps ...string) string {
+	parsed, _ := url.Parse("https://api.github.com")
+	ss := append([]string{parsed.Path}, ps...)
+	parsed.Path = filepath.Join(ss...)
+	return parsed.String()
 }
