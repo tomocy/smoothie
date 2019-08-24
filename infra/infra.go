@@ -90,6 +90,22 @@ type req struct {
 	params      url.Values
 }
 
+func (r *req) do() (*http.Response, error) {
+	if r.method != http.MethodGet {
+		return http.PostForm(r.url, r.params)
+	}
+
+	parsed, err := url.Parse(r.url)
+	if err != nil {
+		return nil, err
+	}
+	if r.params != nil {
+		parsed.RawQuery = r.params.Encode()
+	}
+
+	return http.Get(parsed.String())
+}
+
 type oauthManager struct {
 	temp   *oauth.Credentials
 	client oauth.Client
