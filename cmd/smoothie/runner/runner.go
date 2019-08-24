@@ -51,7 +51,7 @@ type Runner interface {
 }
 
 func parseConfig() (config, error) {
-	v, m, f := flag.String("v", "fetch", "verb"), flag.String("m", modeCLI, "name of mode"), flag.String("f", formatText, "format")
+	v, m, f := flag.String("v", verbFetch, "verb"), flag.String("m", modeCLI, "name of mode"), flag.String("f", formatText, "format")
 	s, clean := flag.Bool("s", false, "enable streaming"), flag.Bool("clean", false, "clean workspace")
 	env := flag.String("env", "./.env", "the path to .env")
 	flag.Parse()
