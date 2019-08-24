@@ -128,52 +128,6 @@ type printer interface {
 	PrintPosts(io.Writer, domain.Posts)
 }
 
-type Continue struct {
-	cnf       config
-	presenter presenter
-}
-
-func (c *Continue) Run() error {
-	if c.cnf.isStreaming {
-		return c.streamPostsOfDrivers()
-	}
-
-	return c.fetchPostsOfDrivers()
-}
-
-func (c *Continue) streamPostsOfDrivers() error {
-	u := newPostUsecase()
-	ctx, cancelFn := context.WithCancel(context.Background())
-	psCh, errCh := u.StreamPostsOfDrivers(ctx, c.cnf.drivers...)
-	sigCh := make(chan os.Signal)
-	defer close(sigCh)
-	signal.Notify(sigCh, syscall.SIGINT)
-	for {
-		select {
-		case ps := <-psCh:
-			c.presenter.ShowPosts(ps)
-		case err := <-errCh:
-			cancelFn()
-			return err
-		case sig := <-sigCh:
-			cancelFn()
-			return errors.New(sig.String())
-		}
-	}
-}
-
-func (c *Continue) fetchPostsOfDrivers() error {
-	u := newPostUsecase()
-	ps, err := u.FetchPostsOfDrivers(c.cnf.drivers...)
-	if err != nil {
-		return err
-	}
-
-	c.presenter.ShowPosts(ps)
-
-	return nil
-}
-
 type Fetch struct {
 	cnf       config
 	presenter presenter
