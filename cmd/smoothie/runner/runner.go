@@ -74,6 +74,7 @@ type config struct {
 const (
 	verbFetch  = "fetch"
 	verbStream = "stream"
+	verbClean  = "clean"
 
 	modeCLI  = "cli"
 	modeHTTP = "http"
