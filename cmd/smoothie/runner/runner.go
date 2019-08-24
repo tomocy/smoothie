@@ -191,6 +191,27 @@ type Stream struct {
 	presenter presenter
 }
 
+func (s *Stream) Run() error {
+	u := newPostUsecase()
+	ctx, cancelFn := context.WithCancel(context.Background())
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, s.cnf.drivers...)
+	sigCh := make(chan os.Signal)
+	defer close(sigCh)
+	signal.Notify(sigCh, syscall.SIGINT)
+	for {
+		select {
+		case ps := <-psCh:
+			s.presenter.ShowPosts(ps)
+		case err := <-errCh:
+			cancelFn()
+			return err
+		case sig := <-sigCh:
+			cancelFn()
+			return errors.New(sig.String())
+		}
+	}
+}
+
 func orderPostsByOldest(ps domain.Posts) domain.Posts {
 	ordered := make(domain.Posts, len(ps))
 	copy(ordered, ps)
