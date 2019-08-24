@@ -125,7 +125,8 @@ func (t *Twitter) fetchTweets(params url.Values) (twitter.Tweets, error) {
 	assured := t.assureDefaultParams(params)
 	var ts twitter.Tweets
 	if err := t.do(oauthReq{
-		cred: cred, method: http.MethodGet, url: t.endpoint("/statuses/home_timeline.json"), params: assured,
+		cred: cred,
+		req:  req{method: http.MethodGet, url: t.endpoint("/statuses/home_timeline.json"), params: assured},
 	}, &ts); err != nil {
 		return nil, err
 	}

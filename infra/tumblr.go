@@ -113,7 +113,8 @@ func (t *Tumblr) fetchPosts(dst string, params url.Values) (tumblr.Posts, error)
 
 	var resp *tumblr.Resp
 	if err := t.do(oauthReq{
-		cred: cred, method: http.MethodGet, url: dst, params: params,
+		cred: cred,
+		req:  req{method: http.MethodGet, url: dst, params: params},
 	}, &resp); err != nil {
 		return nil, err
 	}

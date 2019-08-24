@@ -160,7 +160,8 @@ func (g *Gmail) handleAuthorizationRedirect() (*oauth2.Token, error) {
 func (g *Gmail) listAndGetMessages(tok *oauth2.Token, params url.Values) ([]*gmailLib.Message, error) {
 	assured := g.assureDefaultParams(params)
 	r := oauth2Req{
-		tok: tok, method: http.MethodGet, url: g.endpoint("/users/me/messages"), params: assured,
+		tok: tok,
+		req: req{method: http.MethodGet, url: g.endpoint("/users/me/messages"), params: assured},
 	}
 	var resp *gmailLib.ListMessagesResponse
 	if err := g.do(r, &resp); err != nil {

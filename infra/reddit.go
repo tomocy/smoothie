@@ -120,7 +120,8 @@ func (r *Reddit) fetchPosts(dst string, params url.Values) (*reddit.Posts, error
 	assured := r.assureDefaultParams(params)
 	var ps *reddit.Posts
 	if err := r.do(oauth2Req{
-		tok: tok, method: http.MethodGet, url: dst, params: assured,
+		tok: tok,
+		req: req{method: http.MethodGet, url: dst, params: assured},
 	}, &ps); err != nil {
 		return nil, err
 	}
