@@ -186,6 +186,11 @@ func (f *Fetch) Run() error {
 	return nil
 }
 
+type Stream struct {
+	cnf       config
+	presenter presenter
+}
+
 func orderPostsByOldest(ps domain.Posts) domain.Posts {
 	ordered := make(domain.Posts, len(ps))
 	copy(ordered, ps)
