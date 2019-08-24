@@ -2,6 +2,8 @@ package github
 
 import "time"
 
+type Issues []*Issue
+
 type Issue struct {
 	ID        int       `json:"id"`
 	User      *User     `json:"user"`
