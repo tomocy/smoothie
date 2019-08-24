@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -156,6 +157,10 @@ func (t *Tumblr) do(r oauthReq, dst interface{}) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if http.StatusBadRequest <= resp.StatusCode {
+		return errors.New(resp.Status)
+	}
 
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
