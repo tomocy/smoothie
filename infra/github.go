@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"github.com/tomocy/deverr"
 
@@ -33,6 +34,20 @@ func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 	}()
 
 	return psCh, errCh
+}
+
+func (g *GitHub) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- github.Issues, errCh chan<- error) time.Time {
+	is, err := g.fetchIssues(owner, repo, params)
+	if err != nil {
+		errCh <- err
+		return time.Time{}
+	}
+	if len(is) <= 0 {
+		return time.Time{}
+	}
+
+	isCh <- is
+	return is[0].CreatedAt
 }
 
 func (g *GitHub) FetchPosts() (domain.Posts, error) {
