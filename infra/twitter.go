@@ -35,7 +35,7 @@ type Twitter struct {
 }
 
 func (t *Twitter) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
-	tsCh, errCh := t.streamTweets(ctx, t.endpoint("/statuses/home_timeline.json"), nil)
+	tsCh, errCh := t.streamTweets(ctx, nil)
 	psCh := make(chan domain.Posts)
 	go func() {
 		defer close(psCh)
@@ -52,14 +52,14 @@ func (t *Twitter) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan 
 	return psCh, errCh
 }
 
-func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Values) (<-chan twitter.Tweets, <-chan error) {
+func (t *Twitter) streamTweets(ctx context.Context, params url.Values) (<-chan twitter.Tweets, <-chan error) {
 	tsCh, errCh := make(chan twitter.Tweets), make(chan error)
 	go func() {
 		defer func() {
 			close(tsCh)
 			close(errCh)
 		}()
-		lastID := t.fetchAndSendTweets(ctx, dst, params, tsCh, errCh)
+		lastID := t.fetchAndSendTweets(ctx, params, tsCh, errCh)
 		for {
 			select {
 			case <-ctx.Done():
@@ -71,7 +71,7 @@ func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Value
 					}
 					params.Set("since_id", lastID)
 				}
-				if id := t.fetchAndSendTweets(ctx, dst, params, tsCh, errCh); id != "" {
+				if id := t.fetchAndSendTweets(ctx, params, tsCh, errCh); id != "" {
 					lastID = id
 				}
 			}
@@ -82,10 +82,10 @@ func (t *Twitter) streamTweets(ctx context.Context, dst string, params url.Value
 }
 
 func (t *Twitter) fetchAndSendTweets(
-	ctx context.Context, dst string, params url.Values,
+	ctx context.Context, params url.Values,
 	tsCh chan<- twitter.Tweets, errCh chan<- error,
 ) string {
-	ts, err := t.fetchTweets(dst, params)
+	ts, err := t.fetchTweets(params)
 	if err != nil {
 		select {
 		case <-ctx.Done():
@@ -107,7 +107,7 @@ func (t *Twitter) fetchAndSendTweets(
 }
 
 func (t *Twitter) FetchPosts() (domain.Posts, error) {
-	ts, err := t.fetchTweets(t.endpoint("/statuses/home_timeline.json"), nil)
+	ts, err := t.fetchTweets(nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch posts: %s", err)
 	}
@@ -115,7 +115,7 @@ func (t *Twitter) FetchPosts() (domain.Posts, error) {
 	return ts.Adapt(), nil
 }
 
-func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, error) {
+func (t *Twitter) fetchTweets(params url.Values) (twitter.Tweets, error) {
 	cred, err := t.retreiveAuthorization()
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func (t *Twitter) fetchTweets(dst string, params url.Values) (twitter.Tweets, er
 	assured := t.assureDefaultParams(params)
 	var ts twitter.Tweets
 	if err := t.do(oauthReq{
-		cred: cred, method: http.MethodGet, url: dst, params: assured,
+		cred: cred, method: http.MethodGet, url: t.endpoint("/statuses/home_timeline.json"), params: assured,
 	}, &ts); err != nil {
 		return nil, err
 	}
