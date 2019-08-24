@@ -152,6 +152,8 @@ func (m *oauth2Manager) authURL(params ...oauth2.AuthCodeOption) string {
 
 func (m *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.AuthCodeOption, path string) (*oauth2.Token, error) {
 	tokCh, errCh := make(chan *oauth2.Token), make(chan error)
+	var srv http.Server
+	defer srv.Shutdown(ctx)
 	go func() {
 		defer func() {
 			close(tokCh)
@@ -159,7 +161,7 @@ func (m *oauth2Manager) handleRedirect(ctx context.Context, params []oauth2.Auth
 		}()
 
 		http.Handle(path, m.handlerForRedirect(ctx, params, tokCh, errCh))
-		if err := http.ListenAndServe(":80", nil); err != nil {
+		if err := srv.ListenAndServe(); err != nil {
 			errCh <- err
 		}
 	}()
