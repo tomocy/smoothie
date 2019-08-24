@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/tomocy/deverr"
-
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/github"
 )
@@ -18,22 +16,21 @@ import (
 type GitHub struct{}
 
 func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
-	psCh, errCh := make(chan domain.Posts), make(chan error)
+	isCh, errCh := g.streamIssues(ctx, "golang", "go", nil)
+	ch := make(chan domain.Posts)
 	go func() {
-		defer func() {
-			close(psCh)
-			close(errCh)
-		}()
-
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			errCh <- deverr.NotImplemented
+		defer close(ch)
+		for is := range isCh {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				ch <- is.Adapt()
+			}
 		}
 	}()
 
-	return psCh, errCh
+	return ch, errCh
 }
 
 func (g *GitHub) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan github.Issues, <-chan error) {
