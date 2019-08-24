@@ -87,6 +87,11 @@ func (r *oauth2Req) do(ctx context.Context, cnf oauth2.Config) (*http.Response, 
 	return client.Get(parsed.String())
 }
 
+type req struct {
+	method, url string
+	params      url.Values
+}
+
 type oauthManager struct {
 	temp   *oauth.Credentials
 	client oauth.Client
