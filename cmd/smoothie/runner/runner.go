@@ -13,7 +13,6 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
-
 	"github.com/tomocy/smoothie/app"
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra"
@@ -34,15 +33,21 @@ func New() Runner {
 			err: err,
 		}
 	}
-	if cnf.isClean {
+	switch cnf.verb {
+	case verbFetch:
+		godotenv.Load(cnf.envFilename)
+		return &Fetch{
+			cnf: cnf, presenter: newPresenter(cnf.mode, cnf.format),
+		}
+	case verbStream:
+		godotenv.Load(cnf.envFilename)
+		return &Stream{
+			cnf: cnf, presenter: newPresenter(cnf.mode, cnf.format),
+		}
+	case verbClean:
 		return new(Clean)
-	}
-
-	godotenv.Load(cnf.envFilename)
-
-	return &Continue{
-		cnf:       cnf,
-		presenter: newPresenter(cnf.mode, cnf.format),
+	default:
+		return new(Help)
 	}
 }
 
