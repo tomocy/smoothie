@@ -72,6 +72,8 @@ type config struct {
 }
 
 const (
+	verbFetch = "fetch"
+
 	modeCLI  = "cli"
 	modeHTTP = "http"
 
