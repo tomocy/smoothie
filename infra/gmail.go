@@ -214,7 +214,7 @@ func (g *Gmail) assureDefaultParams(params url.Values) url.Values {
 	if assured == nil {
 		assured = make(url.Values)
 	}
-	assured.Set("maxResults", "5")
+	assured.Set("maxResults", "10")
 
 	return assured
 }
