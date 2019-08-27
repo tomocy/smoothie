@@ -195,11 +195,13 @@ func (h *Help) Run() error {
 
 func newPostUsecase() *app.PostUsecase {
 	rs := map[string]domain.PostRepo{
-		"github":  new(infra.GitHub),
-		"gmail":   infra.NewGmail(idAndSecret("gmail")),
-		"tumblr":  infra.NewTumblr(idAndSecret("tumblr")),
-		"twitter": infra.NewTwitter(idAndSecret("twitter")),
-		"reddit":  infra.NewReddit(idAndSecret("reddit")),
+		"github": new(infra.GitHub),
+		"gmail":  infra.NewGmail(idAndSecret("gmail")),
+		"tumblr": infra.NewTumblr(idAndSecret("tumblr")),
+		"twitter": infra.NewTwitter(
+			os.Getenv("TWITTER_CLIENT_ID"), os.Getenv("TWITTER_CLIENT_SECRET"), new(cli),
+		),
+		"reddit": infra.NewReddit(idAndSecret("reddit")),
 	}
 
 	return app.NewPostUsecase(rs)

@@ -15,7 +15,7 @@ import (
 	"github.com/tomocy/smoothie/infra/twitter"
 )
 
-func NewTwitter(id, secret string) *Twitter {
+func NewTwitter(id, secret string, presenter authURLPresenter) *Twitter {
 	return &Twitter{
 		oauth: oauthManager{
 			client: oauth.Client{
@@ -28,11 +28,13 @@ func NewTwitter(id, secret string) *Twitter {
 				},
 			},
 		},
+		presenter: presenter,
 	}
 }
 
 type Twitter struct {
-	oauth oauthManager
+	oauth     oauthManager
+	presenter authURLPresenter
 }
 
 func (t *Twitter) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
@@ -148,7 +150,7 @@ func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("twitter: open this url: %s\n", url)
+	t.presenter.ShowAuthURL(url)
 
 	return t.handleAuthorizationRedirect()
 }
