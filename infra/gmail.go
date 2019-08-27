@@ -17,7 +17,7 @@ import (
 	gmailLib "google.golang.org/api/gmail/v1"
 )
 
-func NewGmail(id, secret string) *Gmail {
+func NewGmail(id, secret string, presenter authURLPresenter) *Gmail {
 	return &Gmail{
 		oauth: oauth2Manager{
 			cnf: oauth2.Config{
@@ -29,11 +29,13 @@ func NewGmail(id, secret string) *Gmail {
 				},
 			},
 		},
+		presenter: presenter,
 	}
 }
 
 type Gmail struct {
-	oauth oauth2Manager
+	oauth     oauth2Manager
+	presenter authURLPresenter
 }
 
 func (g *Gmail) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
@@ -139,7 +141,7 @@ func (g *Gmail) retreiveAuthorization() (*oauth2.Token, error) {
 	}
 
 	url := g.oauth.authURL(oauth2.AccessTypeOffline)
-	fmt.Printf("open this link: %s\n", url)
+	g.presenter.ShowAuthURL(url)
 
 	return g.handleAuthorizationRedirect()
 }
