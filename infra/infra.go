@@ -224,6 +224,10 @@ func (m *oauth2Manager) checkState(state string) error {
 	return nil
 }
 
+type authURLPresenter interface {
+	ShowAuthURL(string)
+}
+
 type withUserAgent struct{}
 
 func (w *withUserAgent) RoundTrip(r *http.Request) (*http.Response, error) {
