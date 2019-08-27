@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -15,7 +14,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func NewReddit(id, secret string) *Reddit {
+func NewReddit(id, secret string, presenter authURLPresenter) *Reddit {
 	return &Reddit{
 		oauth: oauth2Manager{
 			cnf: oauth2.Config{
@@ -32,11 +31,13 @@ func NewReddit(id, secret string) *Reddit {
 				},
 			},
 		},
+		presenter: presenter,
 	}
 }
 
 type Reddit struct {
-	oauth oauth2Manager
+	oauth     oauth2Manager
+	presenter authURLPresenter
 }
 
 func (r *Reddit) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
@@ -138,7 +139,7 @@ func (r *Reddit) retreiveAuthorization() (*oauth2.Token, error) {
 	}
 
 	url := r.authCodeURL()
-	fmt.Printf("reddit: open this link: %s\n", url)
+	r.presenter.ShowAuthURL(url)
 
 	return r.handleAuthorizationRedirect()
 }
