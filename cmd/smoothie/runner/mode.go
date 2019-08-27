@@ -17,6 +17,10 @@ func (c *cli) ShowPosts(ps domain.Posts) {
 	c.printer.PrintPosts(os.Stdout, ordered)
 }
 
+func (c *cli) ShowAuthURL(url string) {
+	fmt.Printf("open this url: %s\n", url)
+}
+
 type http struct {
 	printer printer
 }
