@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"sort"
-	"strings"
 	"syscall"
 
 	"github.com/joho/godotenv"
@@ -211,8 +210,4 @@ func newPostUsecase() *app.PostUsecase {
 	}
 
 	return app.NewPostUsecase(rs)
-}
-
-func idAndSecret(driver string) (string, string) {
-	return os.Getenv(fmt.Sprintf("%s_CLIENT_ID", strings.ToUpper(driver))), os.Getenv(fmt.Sprintf("%s_CLIENT_SECRET", strings.ToUpper(driver)))
 }
