@@ -16,7 +16,7 @@ import (
 	"github.com/tomocy/smoothie/infra/tumblr"
 )
 
-func NewTumblr(id, secret string) *Tumblr {
+func NewTumblr(id, secret string, presenter authURLPresenter) *Tumblr {
 	return &Tumblr{
 		oauth: oauthManager{
 			client: oauth.Client{
@@ -28,11 +28,13 @@ func NewTumblr(id, secret string) *Tumblr {
 				},
 			},
 		},
+		presenter: presenter,
 	}
 }
 
 type Tumblr struct {
-	oauth oauthManager
+	oauth     oauthManager
+	presenter authURLPresenter
 }
 
 func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
@@ -134,7 +136,7 @@ func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("tumblr: open this url: %s\n", url)
+	t.presenter.ShowAuthURL(url)
 
 	return t.handleAuthorizationRedirect()
 }

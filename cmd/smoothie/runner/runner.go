@@ -197,7 +197,9 @@ func newPostUsecase() *app.PostUsecase {
 	rs := map[string]domain.PostRepo{
 		"github": new(infra.GitHub),
 		"gmail":  infra.NewGmail(idAndSecret("gmail")),
-		"tumblr": infra.NewTumblr(idAndSecret("tumblr")),
+		"tumblr": infra.NewTumblr(
+			os.Getenv("TUMBLR_CLIENT_ID"), os.Getenv("TUMBLR_CLIENT_SECRET"), new(cli),
+		),
 		"twitter": infra.NewTwitter(
 			os.Getenv("TWITTER_CLIENT_ID"), os.Getenv("TWITTER_CLIENT_SECRET"), new(cli),
 		),
