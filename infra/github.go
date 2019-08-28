@@ -32,6 +32,10 @@ func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-c
 	return psCh, errCh
 }
 
+func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
+	return nil, deverr.NotImplemented
+}
+
 type GitHubIssue struct {
 	github
 }
