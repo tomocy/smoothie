@@ -102,11 +102,11 @@ func (g *GitHubEvents) fetchEvents(uname string, header http.Header, params url.
 	return es, dst.header.Get("ETag"), nil
 }
 
-type GitHubIssue struct {
+type GitHubIssues struct {
 	github
 }
 
-func (g *GitHubIssue) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (g *GitHubIssues) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
 	isCh, errCh := g.streamIssues(ctx, "golang", "go", nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -124,7 +124,7 @@ func (g *GitHubIssue) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-c
 	return ch, errCh
 }
 
-func (g *GitHubIssue) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan githubPkg.Issues, <-chan error) {
+func (g *GitHubIssues) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan githubPkg.Issues, <-chan error) {
 	isCh, errCh := make(chan githubPkg.Issues), make(chan error)
 	go func() {
 		defer func() {
@@ -153,7 +153,7 @@ func (g *GitHubIssue) streamIssues(ctx context.Context, owner, repo string, para
 	return isCh, errCh
 }
 
-func (g *GitHubIssue) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- githubPkg.Issues, errCh chan<- error) time.Time {
+func (g *GitHubIssues) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- githubPkg.Issues, errCh chan<- error) time.Time {
 	is, err := g.fetchIssues(owner, repo, params)
 	if err != nil {
 		errCh <- err
@@ -167,7 +167,7 @@ func (g *GitHubIssue) fetchAndSendIssues(owner, repo string, params url.Values, 
 	return is[0].CreatedAt
 }
 
-func (g *GitHubIssue) FetchPosts() (domain.Posts, error) {
+func (g *GitHubIssues) FetchPosts() (domain.Posts, error) {
 	is, err := g.fetchIssues("golang", "go", nil)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func (g *GitHubIssue) FetchPosts() (domain.Posts, error) {
 	return is.Adapt(), nil
 }
 
-func (g *GitHubIssue) fetchIssues(owner, repo string, params url.Values) (githubPkg.Issues, error) {
+func (g *GitHubIssues) fetchIssues(owner, repo string, params url.Values) (githubPkg.Issues, error) {
 	var is githubPkg.Issues
 	dst := &resp{
 		body: &is,
