@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	httpPkg "net/http"
@@ -26,6 +27,22 @@ func (c *cli) fetchPosts() error {
 	c.ShowPosts(ps)
 
 	return nil
+}
+
+func (c *cli) streamPosts(ctx context.Context) error {
+	ds := c.parseDrivers(flag.Args())
+	u := newPostUsecase()
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, ds...)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case ps := <-psCh:
+			c.ShowPosts(ps)
+		case err := <-errCh:
+			return err
+		}
+	}
 }
 
 func (c *cli) parseDrivers(ds []string) []app.Driver {
