@@ -33,7 +33,12 @@ func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-c
 }
 
 func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
-	return nil, deverr.NotImplemented
+	es, err := g.fetchEvents("tomocy", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return es.Adapt(), nil
 }
 
 func (g *GitHubEvent) fetchEvents(uname string, params url.Values) (githubPkg.Events, error) {
