@@ -156,7 +156,7 @@ type Stream struct {
 }
 
 func (s *Stream) Run() error {
-	ctx, cancelFn := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	sigCh := make(chan os.Signal)
 	signal.Notify(sigCh, syscall.SIGINT)
 	go func() {
@@ -164,7 +164,7 @@ func (s *Stream) Run() error {
 		for {
 			select {
 			case sig := <-sigCh:
-				cancelFn()
+				cancel()
 				fmt.Println(sig)
 				return
 			}
