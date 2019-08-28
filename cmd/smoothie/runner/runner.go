@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"sort"
+	"strings"
 	"syscall"
 
 	"github.com/joho/godotenv"
@@ -59,12 +60,14 @@ func parseConfig() (config, error) {
 	env := flag.String("env", "./.env", "the path to .env")
 	flag.Parse()
 
-	return config{
+	cnf := config{
 		verb: *v, mode: *m, format: *f,
 		envFilename: *env,
-		drivers:     flag.Args(),
 		args:        make(map[string][]string),
-	}, nil
+	}
+	cnf.parseDrivers(flag.Args())
+
+	return cnf, nil
 }
 
 type config struct {
@@ -72,6 +75,35 @@ type config struct {
 	envFilename        string
 	drivers            []string
 	args               map[string][]string
+}
+
+func (c *config) parseDrivers(ds []string) {
+	for _, d := range ds {
+		c.parseDriver(d)
+	}
+}
+
+func (c *config) parseDriver(d string) {
+	splited := strings.Split(d, ":")
+	var driver string
+	var args []string
+	switch splited[0] {
+	case "gmail", "tumblr", "twitter", "reddit":
+		driver, args = separateDriverAndArgs(splited, 1)
+	default:
+		driver, args = separateDriverAndArgs(splited, 2)
+	}
+
+	c.drivers = append(c.drivers, driver)
+	c.args[driver] = args
+}
+
+func separateDriverAndArgs(splited []string, n int) (string, []string) {
+	if len(splited) <= n {
+		return strings.Join(splited, ":"), []string{}
+	}
+
+	return strings.Join(splited[:n], ":"), splited[n:]
 }
 
 func (c *config) joinDrivers() []app.Driver {
