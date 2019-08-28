@@ -9,6 +9,15 @@ import (
 
 type Events []*Event
 
+func (es Events) Adapt() domain.Posts {
+	adapteds := make(domain.Posts, len(es))
+	for i, e := range es {
+		adapteds[i] = e.Adapt()
+	}
+
+	return adapteds
+}
+
 type Event struct {
 	ID    string `json:"id"`
 	Type  string `json:"type"`
