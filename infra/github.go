@@ -190,7 +190,8 @@ func (g *GitHubIssues) fetchAndSendIssues(owner, repo string, params url.Values,
 }
 
 func (g *GitHubIssues) FetchPosts(args []string) (domain.Posts, error) {
-	is, err := g.fetchIssues("golang", "go", nil)
+	parsed := g.parseArgs(args)
+	is, err := g.fetchIssues(parsed.owner, parsed.repo, nil)
 	if err != nil {
 		return nil, err
 	}
