@@ -146,6 +146,17 @@ func newPresenter(mode, format string) presenter {
 	}
 }
 
+func newFetcher(mode, format string) fetcher {
+	switch mode {
+	case modeCLI:
+		return &cli{
+			printer: newPrinter(format),
+		}
+	default:
+		return nil
+	}
+}
+
 type fetcher interface {
 	fetchPosts() error
 }
