@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -42,7 +41,7 @@ func New() Runner {
 	case verbStream:
 		godotenv.Load(cnf.envFilename)
 		return &Stream{
-			cnf: cnf, presenter: newPresenter(cnf.mode, cnf.format),
+			cnf: cnf, streamer: newStreamer(cnf.mode, cnf.format),
 		}
 	case verbClean:
 		return new(Clean)
@@ -209,29 +208,26 @@ func (f *Fetch) Run() error {
 }
 
 type Stream struct {
-	cnf       config
-	presenter presenter
+	cnf      config
+	streamer streamer
 }
 
 func (s *Stream) Run() error {
-	u := newPostUsecase()
 	ctx, cancelFn := context.WithCancel(context.Background())
-	psCh, errCh := u.StreamPostsOfDrivers(ctx, s.cnf.joinDrivers()...)
 	sigCh := make(chan os.Signal)
-	defer close(sigCh)
 	signal.Notify(sigCh, syscall.SIGINT)
-	for {
-		select {
-		case ps := <-psCh:
-			s.presenter.ShowPosts(ps)
-		case err := <-errCh:
-			cancelFn()
-			return err
-		case sig := <-sigCh:
-			cancelFn()
-			return errors.New(sig.String())
+	go func() {
+		defer close(sigCh)
+		for {
+			select {
+			case <-sigCh:
+				cancelFn()
+				return
+			}
 		}
-	}
+	}()
+
+	return s.streamer.streamPosts(ctx)
 }
 
 func orderPostsByOldest(ps domain.Posts) domain.Posts {
