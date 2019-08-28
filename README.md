@@ -13,11 +13,14 @@ go install github.com/tomocy/smoothie/cmd/smoothie
 ## Usage
 ```
 Usage of smoothie: [optinos] drivers...
+  -env string
+        the path to .env (default "./.env")
   -f string
         format (default "text")
   -m string
         name of mode (default "cli")
-  -s    enable streaming
+  -v string
+        verb (default "fetch")
 ```
 
 ### Available drivers
