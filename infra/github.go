@@ -132,3 +132,10 @@ func (g *github) do(r req, dst interface{}) error {
 
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
+
+func (g *github) endpoint(ps ...string) string {
+	parsed, _ := url.Parse("https://api.github.com")
+	ss := append([]string{parsed.Path}, ps...)
+	parsed.Path = filepath.Join(ss...)
+	return parsed.String()
+}
