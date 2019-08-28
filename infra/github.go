@@ -106,6 +106,14 @@ type githubEventsArgs struct {
 	uname string
 }
 
+func (as *githubEventsArgs) parse(args []string) {
+	if len(args) <= 0 {
+		return
+	}
+
+	as.uname = args[0]
+}
+
 type GitHubIssues struct {
 	github
 }
