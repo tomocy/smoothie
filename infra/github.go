@@ -36,6 +36,17 @@ func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
 	return nil, deverr.NotImplemented
 }
 
+func (g *GitHubEvent) fetchEvents(uname string, params url.Values) (githubPkg.Events, error) {
+	var es githubPkg.Events
+	if err := g.do(req{
+		method: http.MethodGet, url: g.endpoint("users", uname, "received_events"), params: params,
+	}, &es); err != nil {
+		return nil, err
+	}
+
+	return es, nil
+}
+
 type GitHubIssue struct {
 	github
 }
