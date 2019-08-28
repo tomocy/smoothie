@@ -21,6 +21,9 @@ Usage of smoothie: [optinos] drivers...
 ```
 
 ### Available drivers
+- GitHub Events
+- GitHub Issues
+- Gmail
 - Tumblr
 - Twitter
 - Reddit
