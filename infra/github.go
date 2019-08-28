@@ -211,6 +211,10 @@ func (g *GitHubIssues) fetchIssues(owner, repo string, params url.Values) (githu
 	return is, nil
 }
 
+type githubIssuesArgs struct {
+	owner, repo string
+}
+
 type github struct{}
 
 func (g *github) do(r req, dst *resp) error {
