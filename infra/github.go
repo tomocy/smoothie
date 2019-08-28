@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/tomocy/deverr"
-
 	"github.com/tomocy/smoothie/domain"
 	githubPkg "github.com/tomocy/smoothie/infra/github"
 )
@@ -30,6 +29,50 @@ func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-c
 	}()
 
 	return psCh, errCh
+}
+
+func (g *GitHubEvent) streamEvents(ctx context.Context, uname string, header http.Header, params url.Values) (<-chan githubPkg.Events, <-chan error) {
+	esCh, errCh := make(chan githubPkg.Events), make(chan error)
+	go func() {
+		defer func() {
+			close(esCh)
+			close(errCh)
+		}()
+
+		lastETag := g.fetchAndSendEvents(uname, header, params, esCh, errCh)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(time.Minute):
+				if lastETag != "" {
+					if header == nil {
+						header = make(http.Header)
+					}
+					header.Set("If-None-Match", lastETag)
+				}
+				if etag := g.fetchAndSendEvents(uname, header, params, esCh, errCh); etag != "" {
+					lastETag = etag
+				}
+			}
+		}
+	}()
+
+	return esCh, errCh
+}
+
+func (g *GitHubEvent) fetchAndSendEvents(uname string, header http.Header, params url.Values, esCh chan<- githubPkg.Events, errCh chan<- error) string {
+	es, etag, err := g.fetchEvents(uname, header, params)
+	if err != nil {
+		errCh <- err
+		return ""
+	}
+	if len(es) <= 0 {
+		return ""
+	}
+
+	esCh <- es
+	return etag
 }
 
 func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
@@ -154,6 +197,9 @@ func (g *github) do(r req, dst *resp) error {
 
 	if http.StatusBadRequest <= resp.StatusCode {
 		return errors.New(resp.Status)
+	}
+	if resp.StatusCode == http.StatusNotModified {
+		return nil
 	}
 
 	dst.header = resp.Header
