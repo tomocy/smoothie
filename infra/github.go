@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/tomocy/deverr"
 	"github.com/tomocy/smoothie/domain"
 	githubPkg "github.com/tomocy/smoothie/infra/github"
 )
@@ -19,16 +18,21 @@ type GitHubEvent struct {
 }
 
 func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
-	psCh, errCh := make(chan domain.Posts), make(chan error)
+	esCh, errCh := g.streamEvents(ctx, "tomocy", nil, nil)
+	ch := make(chan domain.Posts)
 	go func() {
-		defer func() {
-			close(psCh)
-			close(errCh)
-		}()
-		errCh <- deverr.NotImplemented
+		defer close(ch)
+		for es := range esCh {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				ch <- es.Adapt()
+			}
+		}
 	}()
 
-	return psCh, errCh
+	return ch, errCh
 }
 
 func (g *GitHubEvent) streamEvents(ctx context.Context, uname string, header http.Header, params url.Values) (<-chan githubPkg.Events, <-chan error) {
