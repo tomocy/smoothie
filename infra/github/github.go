@@ -56,3 +56,9 @@ func (i *Issue) Adapt() *domain.Post {
 type User struct {
 	Login string `json:"login"`
 }
+
+func (u *User) Adapt() *domain.User {
+	return &domain.User{
+		Username: u.Login,
+	}
+}
