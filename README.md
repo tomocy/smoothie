@@ -31,6 +31,16 @@ Usage of smoothie: [optinos] drivers...
 - twitter
 - reddit
 
+### Avaiable args
+- github:events
+```
+github:events:{username}
+```
+- github:issues
+```
+github:issues:{owner/repo}
+```
+
 ## Example
 ### Stream posts of Twitter and Reddit
 ```
