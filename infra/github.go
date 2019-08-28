@@ -9,12 +9,27 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/tomocy/deverr"
+
 	"github.com/tomocy/smoothie/domain"
 	githubPkg "github.com/tomocy/smoothie/infra/github"
 )
 
 type GitHubEvent struct {
 	github
+}
+
+func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+	psCh, errCh := make(chan domain.Posts), make(chan error)
+	go func() {
+		defer func() {
+			close(psCh)
+			close(errCh)
+		}()
+		errCh <- deverr.NotImplemented
+	}()
+
+	return psCh, errCh
 }
 
 type GitHubIssue struct {
