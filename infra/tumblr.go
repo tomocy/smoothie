@@ -37,7 +37,7 @@ type Tumblr struct {
 	presenter authURLPresenter
 }
 
-func (t *Tumblr) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (t *Tumblr) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	psCh, errCh := t.streamPosts(ctx, t.endpoint("/user/dashboard"), nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -98,7 +98,7 @@ func (t *Tumblr) fetchAndSendPosts(dst string, params url.Values, psCh chan<- tu
 	return fmt.Sprintf("%d", ps[0].ID)
 }
 
-func (t *Tumblr) FetchPosts() (domain.Posts, error) {
+func (t *Tumblr) FetchPosts(args []string) (domain.Posts, error) {
 	ps, err := t.fetchPosts(t.endpoint("/user/dashboard"), nil)
 	if err != nil {
 		return nil, err

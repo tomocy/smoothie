@@ -42,7 +42,7 @@ func (u *PostUsecase) streamPosts(ctx context.Context, d string) (<-chan domain.
 		return nil, errCh
 	}
 
-	return repo.StreamPosts(ctx)
+	return repo.StreamPosts(ctx, []string{})
 }
 
 func (u *PostUsecase) fanInPosts(ctx context.Context, chs ...<-chan domain.Posts) <-chan domain.Posts {
@@ -132,5 +132,5 @@ func (u *PostUsecase) fetchPost(d string) (domain.Posts, error) {
 		return nil, fmt.Errorf("unknown driver: %s", d)
 	}
 
-	return repo.FetchPosts()
+	return repo.FetchPosts([]string{})
 }

@@ -17,7 +17,7 @@ type GitHubEvents struct {
 	github
 }
 
-func (g *GitHubEvents) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (g *GitHubEvents) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	esCh, errCh := g.streamEvents(ctx, "tomocy", nil, nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -79,7 +79,7 @@ func (g *GitHubEvents) fetchAndSendEvents(uname string, header http.Header, para
 	return etag
 }
 
-func (g *GitHubEvents) FetchPosts() (domain.Posts, error) {
+func (g *GitHubEvents) FetchPosts(args []string) (domain.Posts, error) {
 	es, _, err := g.fetchEvents("tomocy", nil, nil)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ type GitHubIssues struct {
 	github
 }
 
-func (g *GitHubIssues) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (g *GitHubIssues) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	isCh, errCh := g.streamIssues(ctx, "golang", "go", nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -167,7 +167,7 @@ func (g *GitHubIssues) fetchAndSendIssues(owner, repo string, params url.Values,
 	return is[0].CreatedAt
 }
 
-func (g *GitHubIssues) FetchPosts() (domain.Posts, error) {
+func (g *GitHubIssues) FetchPosts(args []string) (domain.Posts, error) {
 	is, err := g.fetchIssues("golang", "go", nil)
 	if err != nil {
 		return nil, err

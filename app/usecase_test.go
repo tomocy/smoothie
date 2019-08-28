@@ -85,7 +85,7 @@ type mock struct {
 	ps domain.Posts
 }
 
-func (m *mock) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (m *mock) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	psCh, errCh := make(chan domain.Posts), make(chan error)
 	go func() {
 		defer func() {
@@ -110,7 +110,7 @@ func (m *mock) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan err
 	return psCh, errCh
 }
 
-func (m *mock) FetchPosts() (domain.Posts, error) {
+func (m *mock) FetchPosts(args []string) (domain.Posts, error) {
 	return m.ps, nil
 }
 
