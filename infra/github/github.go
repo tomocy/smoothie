@@ -7,6 +7,8 @@ import (
 	"github.com/tomocy/smoothie/domain"
 )
 
+type Events []*Event
+
 type Event struct {
 	ID    string `json:"id"`
 	Type  string `json:"type"`
