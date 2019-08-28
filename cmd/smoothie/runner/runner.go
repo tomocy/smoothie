@@ -59,42 +59,15 @@ func parseConfig() (config, error) {
 	env := flag.String("env", "./.env", "the path to .env")
 	flag.Parse()
 
-	cnf := config{
+	return config{
 		verb: *v, mode: *m, format: *f,
 		envFilename: *env,
-		args:        make(map[string][]string),
-	}
-	cnf.parseDrivers(flag.Args())
-
-	return cnf, nil
+	}, nil
 }
 
 type config struct {
 	verb, mode, format string
 	envFilename        string
-	drivers            []string
-	args               map[string][]string
-}
-
-func (c *config) parseDrivers(ds []string) {
-	for _, d := range ds {
-		c.parseDriver(d)
-	}
-}
-
-func (c *config) parseDriver(d string) {
-	splited := strings.Split(d, ":")
-	var driver string
-	var args []string
-	switch splited[0] {
-	case "gmail", "tumblr", "twitter", "reddit":
-		driver, args = separateDriverAndArgs(splited, 1)
-	default:
-		driver, args = separateDriverAndArgs(splited, 2)
-	}
-
-	c.drivers = append(c.drivers, driver)
-	c.args[driver] = args
 }
 
 func separateDriverAndArgs(splited []string, n int) (string, []string) {
@@ -103,17 +76,6 @@ func separateDriverAndArgs(splited []string, n int) (string, []string) {
 	}
 
 	return strings.Join(splited[:n], ":"), splited[n:]
-}
-
-func (c *config) joinDrivers() []app.Driver {
-	joineds := make([]app.Driver, len(c.drivers))
-	for i, d := range c.drivers {
-		joineds[i] = app.Driver{
-			Name: d, Args: c.args[d],
-		}
-	}
-
-	return joineds
 }
 
 const (
