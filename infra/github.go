@@ -102,6 +102,10 @@ func (g *GitHubEvents) fetchEvents(uname string, header http.Header, params url.
 	return es, dst.header.Get("ETag"), nil
 }
 
+type githubEventsArgs struct {
+	uname string
+}
+
 type GitHubIssues struct {
 	github
 }
