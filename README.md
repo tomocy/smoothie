@@ -34,5 +34,5 @@ Usage of smoothie: [optinos] drivers...
 ## Example
 ### Stream posts of Twitter and Reddit
 ```
-smoothie -s twitter reddit
+smoothie -v stream twitter reddit
 ```
