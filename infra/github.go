@@ -212,6 +212,13 @@ func (g *GitHubIssues) fetchIssues(owner, repo string, params url.Values) (githu
 	return is, nil
 }
 
+func (g *GitHubIssues) parseArgs(args []string) githubIssuesArgs {
+	var parsed githubIssuesArgs
+	parsed.parse(args)
+
+	return parsed
+}
+
 type githubIssuesArgs struct {
 	owner, repo string
 }
