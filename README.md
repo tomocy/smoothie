@@ -11,6 +11,10 @@ go install github.com/tomocy/smoothie/cmd/smoothie
 - Set the IDs and Secrets in your env or in .env file located anywhere (default: current directory) ([.env example](.env.example))
 
 ## Example
+- fetch GitHub issues of [golang/go](https://github.com/golang/go)
+```
+smoothie github:issues:golang/go
+```
 - stream posts of Twitter and Reddit
 ```
 smoothie -v stream twitter reddit
