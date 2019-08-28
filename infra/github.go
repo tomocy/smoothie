@@ -13,11 +13,11 @@ import (
 	githubPkg "github.com/tomocy/smoothie/infra/github"
 )
 
-type GitHubEvent struct {
+type GitHubEvents struct {
 	github
 }
 
-func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (g *GitHubEvents) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
 	esCh, errCh := g.streamEvents(ctx, "tomocy", nil, nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -35,7 +35,7 @@ func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-c
 	return ch, errCh
 }
 
-func (g *GitHubEvent) streamEvents(ctx context.Context, uname string, header http.Header, params url.Values) (<-chan githubPkg.Events, <-chan error) {
+func (g *GitHubEvents) streamEvents(ctx context.Context, uname string, header http.Header, params url.Values) (<-chan githubPkg.Events, <-chan error) {
 	esCh, errCh := make(chan githubPkg.Events), make(chan error)
 	go func() {
 		defer func() {
@@ -65,7 +65,7 @@ func (g *GitHubEvent) streamEvents(ctx context.Context, uname string, header htt
 	return esCh, errCh
 }
 
-func (g *GitHubEvent) fetchAndSendEvents(uname string, header http.Header, params url.Values, esCh chan<- githubPkg.Events, errCh chan<- error) string {
+func (g *GitHubEvents) fetchAndSendEvents(uname string, header http.Header, params url.Values, esCh chan<- githubPkg.Events, errCh chan<- error) string {
 	es, etag, err := g.fetchEvents(uname, header, params)
 	if err != nil {
 		errCh <- err
@@ -79,7 +79,7 @@ func (g *GitHubEvent) fetchAndSendEvents(uname string, header http.Header, param
 	return etag
 }
 
-func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
+func (g *GitHubEvents) FetchPosts() (domain.Posts, error) {
 	es, _, err := g.fetchEvents("tomocy", nil, nil)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
 	return es.Adapt(), nil
 }
 
-func (g *GitHubEvent) fetchEvents(uname string, header http.Header, params url.Values) (githubPkg.Events, string, error) {
+func (g *GitHubEvents) fetchEvents(uname string, header http.Header, params url.Values) (githubPkg.Events, string, error) {
 	var es githubPkg.Events
 	dst := &resp{
 		body: &es,
