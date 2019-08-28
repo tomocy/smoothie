@@ -146,6 +146,10 @@ func newPresenter(mode, format string) presenter {
 	}
 }
 
+type fetcher interface {
+	fetchPosts() error
+}
+
 type presenter interface {
 	ShowPosts(domain.Posts)
 }
