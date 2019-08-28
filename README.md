@@ -24,12 +24,12 @@ Usage of smoothie: [optinos] drivers...
 ```
 
 ### Available drivers
-- GitHub Events
-- GitHub Issues
-- Gmail
-- Tumblr
-- Twitter
-- Reddit
+- github:events
+- github:issues
+- gmail
+- tumblr
+- twitter
+- reddit
 
 ## Example
 ### Stream posts of Twitter and Reddit
