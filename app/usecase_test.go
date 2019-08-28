@@ -17,7 +17,7 @@ func TestStremPostsOfDrivers(t *testing.T) {
 	}
 	u := newMockPostUsecase()
 	ctx, cancelFn := context.WithCancel(context.Background())
-	psCh, errCh := u.StreamPostsOfDrivers(ctx, "a", "b")
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, Driver{Name: "a"}, Driver{Name: "b"})
 	var actuals domain.Posts
 waiting:
 	for {
@@ -52,7 +52,7 @@ func TestFetchPostsOfDrivers(t *testing.T) {
 		{ID: "3", Driver: "b", Text: "three", CreatedAt: expectedDate},
 	}
 	u := newMockPostUsecase()
-	actuals, err := u.FetchPostsOfDrivers("a", "b")
+	actuals, err := u.FetchPostsOfDrivers(Driver{Name: "a"}, Driver{Name: "b"})
 	if err != nil {
 		t.Errorf("unexpected error by (*PostUsecase).FetchPostsOfDrivers: got %s, expect <nil>\n", err)
 	}
