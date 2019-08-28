@@ -129,7 +129,8 @@ type GitHubIssues struct {
 }
 
 func (g *GitHubIssues) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
-	isCh, errCh := g.streamIssues(ctx, "golang", "go", nil)
+	parsed := g.parseArgs(args)
+	isCh, errCh := g.streamIssues(ctx, parsed.owner, parsed.repo, nil)
 	ch := make(chan domain.Posts)
 	go func() {
 		defer close(ch)
