@@ -43,9 +43,12 @@ func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
 
 func (g *GitHubEvent) fetchEvents(uname string, params url.Values) (githubPkg.Events, error) {
 	var es githubPkg.Events
+	dst := &resp{
+		body: &es,
+	}
 	if err := g.do(req{
 		method: http.MethodGet, url: g.endpoint("users", uname, "received_events"), params: params,
-	}, &es); err != nil {
+	}, dst); err != nil {
 		return nil, err
 	}
 
@@ -128,9 +131,12 @@ func (g *GitHubIssue) FetchPosts() (domain.Posts, error) {
 
 func (g *GitHubIssue) fetchIssues(owner, repo string, params url.Values) (githubPkg.Issues, error) {
 	var is githubPkg.Issues
+	dst := &resp{
+		body: &is,
+	}
 	if err := g.do(req{
 		method: http.MethodGet, url: g.endpoint("repos", owner, repo, "issues"), params: params,
-	}, &is); err != nil {
+	}, dst); err != nil {
 		return nil, err
 	}
 
@@ -139,7 +145,7 @@ func (g *GitHubIssue) fetchIssues(owner, repo string, params url.Values) (github
 
 type github struct{}
 
-func (g *github) do(r req, dst interface{}) error {
+func (g *github) do(r req, dst *resp) error {
 	resp, err := r.do()
 	if err != nil {
 		return err
@@ -150,7 +156,8 @@ func (g *github) do(r req, dst interface{}) error {
 		return errors.New(resp.Status)
 	}
 
-	return json.NewDecoder(resp.Body).Decode(dst)
+	dst.header = resp.Header
+	return json.NewDecoder(resp.Body).Decode(dst.body)
 }
 
 func (g *github) endpoint(ps ...string) string {
