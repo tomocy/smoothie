@@ -36,7 +36,10 @@ func (c *cli) streamPosts(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			if err := ctx.Err(); err != context.Canceled {
+				return err
+			}
+			return nil
 		case ps := <-psCh:
 			c.ShowPosts(ps)
 		case err := <-errCh:
