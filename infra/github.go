@@ -18,7 +18,8 @@ type GitHubEvents struct {
 }
 
 func (g *GitHubEvents) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
-	esCh, errCh := g.streamEvents(ctx, "tomocy", nil, nil)
+	parsed := g.parseArgs(args)
+	esCh, errCh := g.streamEvents(ctx, parsed.uname, nil, nil)
 	ch := make(chan domain.Posts)
 	go func() {
 		defer close(ch)
