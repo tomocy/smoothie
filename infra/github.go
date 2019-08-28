@@ -13,6 +13,10 @@ import (
 	githubPkg "github.com/tomocy/smoothie/infra/github"
 )
 
+type GitHubEvent struct {
+	github
+}
+
 type GitHubIssue struct {
 	github
 }
