@@ -161,6 +161,17 @@ type fetcher interface {
 	fetchPosts() error
 }
 
+func newStreamer(mode, format string) streamer {
+	switch mode {
+	case modeCLI:
+		return &cli{
+			printer: newPrinter(format),
+		}
+	default:
+		return nil
+	}
+}
+
 type streamer interface {
 	streamPosts(context.Context) error
 }
