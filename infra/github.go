@@ -102,6 +102,13 @@ func (g *GitHubEvents) fetchEvents(uname string, header http.Header, params url.
 	return es, dst.header.Get("ETag"), nil
 }
 
+func (g *GitHubEvents) parseArgs(args []string) githubEventsArgs {
+	var parsed githubEventsArgs
+	parsed.parse(args)
+
+	return parsed
+}
+
 type githubEventsArgs struct {
 	uname string
 }
