@@ -142,6 +142,11 @@ func (r *req) joinURLWithEncodedQuery() (string, error) {
 	return parsed.String(), nil
 }
 
+type resp struct {
+	header http.Header
+	body   interface{}
+}
+
 type oauthManager struct {
 	temp   *oauth.Credentials
 	client oauth.Client
