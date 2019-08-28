@@ -63,6 +63,7 @@ func parseConfig() (config, error) {
 		verb: *v, mode: *m, format: *f,
 		envFilename: *env,
 		drivers:     flag.Args(),
+		args:        make(map[string][]string),
 	}, nil
 }
 
@@ -70,6 +71,18 @@ type config struct {
 	verb, mode, format string
 	envFilename        string
 	drivers            []string
+	args               map[string][]string
+}
+
+func (c *config) joinDrivers() []app.Driver {
+	joineds := make([]app.Driver, len(c.drivers))
+	for i, d := range c.drivers {
+		joineds[i] = app.Driver{
+			Name: d, Args: c.args[d],
+		}
+	}
+
+	return joineds
 }
 
 const (
@@ -131,7 +144,7 @@ type Fetch struct {
 
 func (f *Fetch) Run() error {
 	u := newPostUsecase()
-	ps, err := u.FetchPostsOfDrivers(f.cnf.drivers...)
+	ps, err := u.FetchPostsOfDrivers(f.cnf.joinDrivers()...)
 	if err != nil {
 		return err
 	}
@@ -149,7 +162,7 @@ type Stream struct {
 func (s *Stream) Run() error {
 	u := newPostUsecase()
 	ctx, cancelFn := context.WithCancel(context.Background())
-	psCh, errCh := u.StreamPostsOfDrivers(ctx, s.cnf.drivers...)
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, s.cnf.joinDrivers()...)
 	sigCh := make(chan os.Signal)
 	defer close(sigCh)
 	signal.Notify(sigCh, syscall.SIGINT)
