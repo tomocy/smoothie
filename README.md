@@ -10,6 +10,12 @@ go install github.com/tomocy/smoothie/cmd/smoothie
 - Register an app in social media you want to use as the drivers and Keep the Client ID and Secert
 - Set the IDs and Secrets in your env or in .env file located anywhere (default: current directory) ([.env example](.env.example))
 
+## Example
+- stream posts of Twitter and Reddit
+```
+smoothie -v stream twitter reddit
+```
+
 ## Usage
 ```
 Usage of smoothie: [optinos] drivers...
@@ -39,10 +45,4 @@ github:events:{username}
 - github:issues
 ```
 github:issues:{owner/repo}
-```
-
-## Example
-### Stream posts of Twitter and Reddit
-```
-smoothie -v stream twitter reddit
 ```
