@@ -87,6 +87,7 @@ func (r *oauth2Req) do(ctx context.Context, cnf oauth2.Config) (*http.Response, 
 
 type req struct {
 	method, url string
+	header      http.Header
 	params      url.Values
 }
 
