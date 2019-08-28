@@ -17,7 +17,7 @@ func TestStremPostsOfDrivers(t *testing.T) {
 	}
 	u := newMockPostUsecase()
 	ctx, cancelFn := context.WithCancel(context.Background())
-	psCh, errCh := u.StreamPostsOfDrivers(ctx, "a", "b")
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, Driver{Name: "a"}, Driver{Name: "b"})
 	var actuals domain.Posts
 waiting:
 	for {
@@ -52,7 +52,7 @@ func TestFetchPostsOfDrivers(t *testing.T) {
 		{ID: "3", Driver: "b", Text: "three", CreatedAt: expectedDate},
 	}
 	u := newMockPostUsecase()
-	actuals, err := u.FetchPostsOfDrivers("a", "b")
+	actuals, err := u.FetchPostsOfDrivers(Driver{Name: "a"}, Driver{Name: "b"})
 	if err != nil {
 		t.Errorf("unexpected error by (*PostUsecase).FetchPostsOfDrivers: got %s, expect <nil>\n", err)
 	}
@@ -85,7 +85,7 @@ type mock struct {
 	ps domain.Posts
 }
 
-func (m *mock) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (m *mock) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	psCh, errCh := make(chan domain.Posts), make(chan error)
 	go func() {
 		defer func() {
@@ -110,7 +110,7 @@ func (m *mock) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan err
 	return psCh, errCh
 }
 
-func (m *mock) FetchPosts() (domain.Posts, error) {
+func (m *mock) FetchPosts(args []string) (domain.Posts, error) {
 	return m.ps, nil
 }
 

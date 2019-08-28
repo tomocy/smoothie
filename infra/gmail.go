@@ -38,7 +38,7 @@ type Gmail struct {
 	presenter authURLPresenter
 }
 
-func (g *Gmail) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (g *Gmail) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	msCh, errCh := g.streamMessages(ctx, nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -102,7 +102,7 @@ func (g *Gmail) fetchAndSendMessages(params url.Values, msCh chan<- gmail.Messag
 	return lastCreatedAt
 }
 
-func (g *Gmail) FetchPosts() (domain.Posts, error) {
+func (g *Gmail) FetchPosts(args []string) (domain.Posts, error) {
 	ms, err := g.fetchMessages(nil)
 	if err != nil {
 		return nil, err

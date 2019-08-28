@@ -37,7 +37,7 @@ type Twitter struct {
 	presenter authURLPresenter
 }
 
-func (t *Twitter) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (t *Twitter) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	tsCh, errCh := t.streamTweets(ctx, nil)
 	psCh := make(chan domain.Posts)
 	go func() {
@@ -109,7 +109,7 @@ func (t *Twitter) fetchAndSendTweets(
 	return ts[0].ID
 }
 
-func (t *Twitter) FetchPosts() (domain.Posts, error) {
+func (t *Twitter) FetchPosts(args []string) (domain.Posts, error) {
 	ts, err := t.fetchTweets(nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch posts: %s", err)

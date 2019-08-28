@@ -40,7 +40,7 @@ type Reddit struct {
 	presenter authURLPresenter
 }
 
-func (r *Reddit) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (r *Reddit) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	psCh, errCh := r.streamPosts(ctx, r.endpoint("/new"), nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -103,7 +103,7 @@ func (r *Reddit) fetchAndSendPosts(dst string, params url.Values, psCh chan<- *r
 	return lastID
 }
 
-func (r *Reddit) FetchPosts() (domain.Posts, error) {
+func (r *Reddit) FetchPosts(args []string) (domain.Posts, error) {
 	ps, err := r.fetchPosts(r.endpoint("/new"), nil)
 	if err != nil {
 		return nil, err

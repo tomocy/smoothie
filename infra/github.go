@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/tomocy/smoothie/domain"
@@ -17,8 +18,9 @@ type GitHubEvents struct {
 	github
 }
 
-func (g *GitHubEvents) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
-	esCh, errCh := g.streamEvents(ctx, "tomocy", nil, nil)
+func (g *GitHubEvents) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
+	parsed := g.parseArgs(args)
+	esCh, errCh := g.streamEvents(ctx, parsed.uname, nil, nil)
 	ch := make(chan domain.Posts)
 	go func() {
 		defer close(ch)
@@ -79,8 +81,9 @@ func (g *GitHubEvents) fetchAndSendEvents(uname string, header http.Header, para
 	return etag
 }
 
-func (g *GitHubEvents) FetchPosts() (domain.Posts, error) {
-	es, _, err := g.fetchEvents("tomocy", nil, nil)
+func (g *GitHubEvents) FetchPosts(args []string) (domain.Posts, error) {
+	parsed := g.parseArgs(args)
+	es, _, err := g.fetchEvents(parsed.uname, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -102,12 +105,32 @@ func (g *GitHubEvents) fetchEvents(uname string, header http.Header, params url.
 	return es, dst.header.Get("ETag"), nil
 }
 
+func (g *GitHubEvents) parseArgs(args []string) githubEventsArgs {
+	var parsed githubEventsArgs
+	parsed.parse(args)
+
+	return parsed
+}
+
+type githubEventsArgs struct {
+	uname string
+}
+
+func (as *githubEventsArgs) parse(args []string) {
+	if len(args) <= 0 {
+		return
+	}
+
+	as.uname = args[0]
+}
+
 type GitHubIssues struct {
 	github
 }
 
-func (g *GitHubIssues) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
-	isCh, errCh := g.streamIssues(ctx, "golang", "go", nil)
+func (g *GitHubIssues) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
+	parsed := g.parseArgs(args)
+	isCh, errCh := g.streamIssues(ctx, parsed.owner, parsed.repo, nil)
 	ch := make(chan domain.Posts)
 	go func() {
 		defer close(ch)
@@ -167,8 +190,9 @@ func (g *GitHubIssues) fetchAndSendIssues(owner, repo string, params url.Values,
 	return is[0].CreatedAt
 }
 
-func (g *GitHubIssues) FetchPosts() (domain.Posts, error) {
-	is, err := g.fetchIssues("golang", "go", nil)
+func (g *GitHubIssues) FetchPosts(args []string) (domain.Posts, error) {
+	parsed := g.parseArgs(args)
+	is, err := g.fetchIssues(parsed.owner, parsed.repo, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -188,6 +212,29 @@ func (g *GitHubIssues) fetchIssues(owner, repo string, params url.Values) (githu
 	}
 
 	return is, nil
+}
+
+func (g *GitHubIssues) parseArgs(args []string) githubIssuesArgs {
+	var parsed githubIssuesArgs
+	parsed.parse(args)
+
+	return parsed
+}
+
+type githubIssuesArgs struct {
+	owner, repo string
+}
+
+func (as *githubIssuesArgs) parse(args []string) {
+	if len(args) <= 0 {
+		return
+	}
+
+	splited := strings.Split(args[0], "/")
+	if len(splited) == 2 {
+		as.owner = splited[0]
+		as.repo = splited[1]
+	}
 }
 
 type github struct{}

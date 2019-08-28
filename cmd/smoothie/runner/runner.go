@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"sort"
+	"strings"
 	"syscall"
 
 	"github.com/joho/godotenv"
@@ -59,17 +60,61 @@ func parseConfig() (config, error) {
 	env := flag.String("env", "./.env", "the path to .env")
 	flag.Parse()
 
-	return config{
+	cnf := config{
 		verb: *v, mode: *m, format: *f,
 		envFilename: *env,
-		drivers:     flag.Args(),
-	}, nil
+		args:        make(map[string][]string),
+	}
+	cnf.parseDrivers(flag.Args())
+
+	return cnf, nil
 }
 
 type config struct {
 	verb, mode, format string
 	envFilename        string
 	drivers            []string
+	args               map[string][]string
+}
+
+func (c *config) parseDrivers(ds []string) {
+	for _, d := range ds {
+		c.parseDriver(d)
+	}
+}
+
+func (c *config) parseDriver(d string) {
+	splited := strings.Split(d, ":")
+	var driver string
+	var args []string
+	switch splited[0] {
+	case "gmail", "tumblr", "twitter", "reddit":
+		driver, args = separateDriverAndArgs(splited, 1)
+	default:
+		driver, args = separateDriverAndArgs(splited, 2)
+	}
+
+	c.drivers = append(c.drivers, driver)
+	c.args[driver] = args
+}
+
+func separateDriverAndArgs(splited []string, n int) (string, []string) {
+	if len(splited) <= n {
+		return strings.Join(splited, ":"), []string{}
+	}
+
+	return strings.Join(splited[:n], ":"), splited[n:]
+}
+
+func (c *config) joinDrivers() []app.Driver {
+	joineds := make([]app.Driver, len(c.drivers))
+	for i, d := range c.drivers {
+		joineds[i] = app.Driver{
+			Name: d, Args: c.args[d],
+		}
+	}
+
+	return joineds
 }
 
 const (
@@ -131,7 +176,7 @@ type Fetch struct {
 
 func (f *Fetch) Run() error {
 	u := newPostUsecase()
-	ps, err := u.FetchPostsOfDrivers(f.cnf.drivers...)
+	ps, err := u.FetchPostsOfDrivers(f.cnf.joinDrivers()...)
 	if err != nil {
 		return err
 	}
@@ -149,7 +194,7 @@ type Stream struct {
 func (s *Stream) Run() error {
 	u := newPostUsecase()
 	ctx, cancelFn := context.WithCancel(context.Background())
-	psCh, errCh := u.StreamPostsOfDrivers(ctx, s.cnf.drivers...)
+	psCh, errCh := u.StreamPostsOfDrivers(ctx, s.cnf.joinDrivers()...)
 	sigCh := make(chan os.Signal)
 	defer close(sigCh)
 	signal.Notify(sigCh, syscall.SIGINT)
