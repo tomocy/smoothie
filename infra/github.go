@@ -118,3 +118,17 @@ func (g *GitHubIssue) endpoint(ps ...string) string {
 }
 
 type github struct{}
+
+func (g *github) do(r req, dst interface{}) error {
+	resp, err := r.do()
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if http.StatusBadRequest <= resp.StatusCode {
+		return errors.New(resp.Status)
+	}
+
+	return json.NewDecoder(resp.Body).Decode(dst)
+}
