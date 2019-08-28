@@ -43,11 +43,9 @@ type Issue struct {
 
 func (i *Issue) Adapt() *domain.Post {
 	return &domain.Post{
-		ID:     fmt.Sprint(i.ID),
-		Driver: "github",
-		User: &domain.User{
-			Username: i.User.Login,
-		},
+		ID:        fmt.Sprint(i.ID),
+		Driver:    "github",
+		User:      i.User.Adapt(),
 		Text:      fmt.Sprintf("%s\n%s", i.Title, i.Body),
 		CreatedAt: i.CreatedAt,
 	}
