@@ -7,8 +7,8 @@ go install github.com/tomocy/smoothie/cmd/smoothie
 ```
 
 ## Prerequisites
-- Register an app in social media you want to use as the drivers and Keep the Client ID and Secert
-- Set the IDs and Secrets in your env or in .env file located anywhere (default: current directory) ([.env example](.env.example))
+- Register an app in the development console of the social media you want to use as drivers and keep the Client ID and Secert
+- Set the IDs and the Secrets in your env or in .env file located anywhere (default: .env in current directory is used) and name them as `{driver name}_CLIENT_ID` and `{driver name}_CLIENT_SECRET` ([.env example](.env.example))
 
 ## Example
 - fetch GitHub issues of [golang/go](https://github.com/golang/go)
