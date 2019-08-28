@@ -194,7 +194,7 @@ func (h *Help) Run() error {
 
 func newPostUsecase() *app.PostUsecase {
 	rs := map[string]domain.PostRepo{
-		"github": new(infra.GitHub),
+		"github:issue": new(infra.GitHubIssue),
 		"gmail": infra.NewGmail(
 			os.Getenv("GMAIL_CLIENT_ID"), os.Getenv("GMAIL_CLIENT_SECRET"), new(cli),
 		),

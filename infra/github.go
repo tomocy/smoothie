@@ -13,9 +13,9 @@ import (
 	"github.com/tomocy/smoothie/infra/github"
 )
 
-type GitHub struct{}
+type GitHubIssue struct{}
 
-func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
+func (g *GitHubIssue) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
 	isCh, errCh := g.streamIssues(ctx, "golang", "go", nil)
 	ch := make(chan domain.Posts)
 	go func() {
@@ -33,7 +33,7 @@ func (g *GitHub) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan e
 	return ch, errCh
 }
 
-func (g *GitHub) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan github.Issues, <-chan error) {
+func (g *GitHubIssue) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan github.Issues, <-chan error) {
 	isCh, errCh := make(chan github.Issues), make(chan error)
 	go func() {
 		defer func() {
@@ -62,7 +62,7 @@ func (g *GitHub) streamIssues(ctx context.Context, owner, repo string, params ur
 	return isCh, errCh
 }
 
-func (g *GitHub) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- github.Issues, errCh chan<- error) time.Time {
+func (g *GitHubIssue) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- github.Issues, errCh chan<- error) time.Time {
 	is, err := g.fetchIssues(owner, repo, params)
 	if err != nil {
 		errCh <- err
@@ -76,7 +76,7 @@ func (g *GitHub) fetchAndSendIssues(owner, repo string, params url.Values, isCh 
 	return is[0].CreatedAt
 }
 
-func (g *GitHub) FetchPosts() (domain.Posts, error) {
+func (g *GitHubIssue) FetchPosts() (domain.Posts, error) {
 	is, err := g.fetchIssues("golang", "go", nil)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (g *GitHub) FetchPosts() (domain.Posts, error) {
 	return is.Adapt(), nil
 }
 
-func (g *GitHub) fetchIssues(owner, repo string, params url.Values) (github.Issues, error) {
+func (g *GitHubIssue) fetchIssues(owner, repo string, params url.Values) (github.Issues, error) {
 	var is github.Issues
 	if err := g.do(req{
 		method: http.MethodGet, url: g.endpoint("repos", owner, repo, "issues"), params: params,
@@ -96,7 +96,7 @@ func (g *GitHub) fetchIssues(owner, repo string, params url.Values) (github.Issu
 	return is, nil
 }
 
-func (g *GitHub) do(r req, dst interface{}) error {
+func (g *GitHubIssue) do(r req, dst interface{}) error {
 	resp, err := r.do()
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (g *GitHub) do(r req, dst interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(dst)
 }
 
-func (g *GitHub) endpoint(ps ...string) string {
+func (g *GitHubIssue) endpoint(ps ...string) string {
 	parsed, _ := url.Parse("https://api.github.com")
 	ss := append([]string{parsed.Path}, ps...)
 	parsed.Path = filepath.Join(ss...)
