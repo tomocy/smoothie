@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/tomocy/smoothie/domain"
-	"github.com/tomocy/smoothie/infra/github"
+	githubPkg "github.com/tomocy/smoothie/infra/github"
 )
 
 type GitHubIssue struct{}
@@ -33,8 +33,8 @@ func (g *GitHubIssue) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-c
 	return ch, errCh
 }
 
-func (g *GitHubIssue) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan github.Issues, <-chan error) {
-	isCh, errCh := make(chan github.Issues), make(chan error)
+func (g *GitHubIssue) streamIssues(ctx context.Context, owner, repo string, params url.Values) (<-chan githubPkg.Issues, <-chan error) {
+	isCh, errCh := make(chan githubPkg.Issues), make(chan error)
 	go func() {
 		defer func() {
 			close(isCh)
@@ -62,7 +62,7 @@ func (g *GitHubIssue) streamIssues(ctx context.Context, owner, repo string, para
 	return isCh, errCh
 }
 
-func (g *GitHubIssue) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- github.Issues, errCh chan<- error) time.Time {
+func (g *GitHubIssue) fetchAndSendIssues(owner, repo string, params url.Values, isCh chan<- githubPkg.Issues, errCh chan<- error) time.Time {
 	is, err := g.fetchIssues(owner, repo, params)
 	if err != nil {
 		errCh <- err
@@ -85,8 +85,8 @@ func (g *GitHubIssue) FetchPosts() (domain.Posts, error) {
 	return is.Adapt(), nil
 }
 
-func (g *GitHubIssue) fetchIssues(owner, repo string, params url.Values) (github.Issues, error) {
-	var is github.Issues
+func (g *GitHubIssue) fetchIssues(owner, repo string, params url.Values) (githubPkg.Issues, error) {
+	var is githubPkg.Issues
 	if err := g.do(req{
 		method: http.MethodGet, url: g.endpoint("repos", owner, repo, "issues"), params: params,
 	}, &is); err != nil {
@@ -116,3 +116,5 @@ func (g *GitHubIssue) endpoint(ps ...string) string {
 	parsed.Path = filepath.Join(ss...)
 	return parsed.String()
 }
+
+type github struct{}
