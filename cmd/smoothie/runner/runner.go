@@ -161,6 +161,10 @@ type fetcher interface {
 	fetchPosts() error
 }
 
+type streamer interface {
+	streamPosts(context.Context) error
+}
+
 type presenter interface {
 	ShowPosts(domain.Posts)
 }
