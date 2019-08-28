@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/garyburd/go-oauth/oauth"
 	"golang.org/x/oauth2"
@@ -93,18 +94,48 @@ type req struct {
 
 func (r *req) do() (*http.Response, error) {
 	if r.method != http.MethodGet {
-		return http.PostForm(r.url, r.params)
+		return r.postForm()
 	}
 
-	parsed, err := url.Parse(r.url)
+	return r.get()
+}
+
+func (r *req) postForm() (*http.Response, error) {
+	req, err := http.NewRequest(http.MethodPost, r.url, strings.NewReader(r.params.Encode()))
 	if err != nil {
 		return nil, err
+	}
+	if r.header != nil {
+		req.Header = r.header
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	return http.DefaultClient.Do(req)
+}
+
+func (r *req) get() (*http.Response, error) {
+	joined, err := r.joinURLWithEncodedQuery()
+	req, err := http.NewRequest(http.MethodGet, joined, nil)
+	if err != nil {
+		return nil, err
+	}
+	if r.header != nil {
+		req.Header = r.header
+	}
+
+	return http.DefaultClient.Do(req)
+}
+
+func (r *req) joinURLWithEncodedQuery() (string, error) {
+	parsed, err := url.Parse(r.url)
+	if err != nil {
+		return "", err
 	}
 	if r.params != nil {
 		parsed.RawQuery = r.params.Encode()
 	}
 
-	return http.Get(parsed.String())
+	return parsed.String(), nil
 }
 
 type oauthManager struct {
