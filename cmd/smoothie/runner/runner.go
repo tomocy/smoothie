@@ -92,21 +92,6 @@ const (
 	formatJSON  = "json"
 )
 
-func newPresenter(mode, format string) presenter {
-	switch mode {
-	case modeCLI:
-		return &cli{
-			printer: newPrinter(format),
-		}
-	case modeHTTP:
-		return &http{
-			printer: newPrinter(format),
-		}
-	default:
-		return nil
-	}
-}
-
 func newFetcher(mode, format string) fetcher {
 	switch mode {
 	case modeCLI:
@@ -135,10 +120,6 @@ func newStreamer(mode, format string) streamer {
 
 type streamer interface {
 	streamPosts(context.Context) error
-}
-
-type presenter interface {
-	ShowPosts(domain.Posts)
 }
 
 func newPrinter(format string) printer {
