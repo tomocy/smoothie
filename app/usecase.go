@@ -134,3 +134,8 @@ func (u *PostUsecase) fetchPost(d string) (domain.Posts, error) {
 
 	return repo.FetchPosts([]string{})
 }
+
+type Driver struct {
+	Name string
+	Args []string
+}
