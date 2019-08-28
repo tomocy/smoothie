@@ -33,7 +33,7 @@ func (g *GitHubEvent) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-c
 }
 
 func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
-	es, _, err := g.fetchEvents("tomocy", nil)
+	es, _, err := g.fetchEvents("tomocy", nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +41,13 @@ func (g *GitHubEvent) FetchPosts() (domain.Posts, error) {
 	return es.Adapt(), nil
 }
 
-func (g *GitHubEvent) fetchEvents(uname string, params url.Values) (githubPkg.Events, string, error) {
+func (g *GitHubEvent) fetchEvents(uname string, header http.Header, params url.Values) (githubPkg.Events, string, error) {
 	var es githubPkg.Events
 	dst := &resp{
 		body: &es,
 	}
 	if err := g.do(req{
-		method: http.MethodGet, url: g.endpoint("users", uname, "received_events"), params: params,
+		method: http.MethodGet, url: g.endpoint("users", uname, "received_events"), header: header, params: params,
 	}, dst); err != nil {
 		return nil, "", err
 	}
