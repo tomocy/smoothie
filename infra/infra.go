@@ -115,6 +115,10 @@ func (r *req) postForm() (*http.Response, error) {
 
 func (r *req) get() (*http.Response, error) {
 	joined, err := r.joinURLWithEncodedQuery()
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := http.NewRequest(http.MethodGet, joined, nil)
 	if err != nil {
 		return nil, err
