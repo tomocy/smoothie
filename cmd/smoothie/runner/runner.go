@@ -163,8 +163,9 @@ func (s *Stream) Run() error {
 		defer close(sigCh)
 		for {
 			select {
-			case <-sigCh:
+			case sig := <-sigCh:
 				cancelFn()
+				fmt.Println(sig)
 				return
 			}
 		}
