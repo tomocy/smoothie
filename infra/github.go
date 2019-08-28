@@ -80,7 +80,8 @@ func (g *GitHubEvents) fetchAndSendEvents(uname string, header http.Header, para
 }
 
 func (g *GitHubEvents) FetchPosts(args []string) (domain.Posts, error) {
-	es, _, err := g.fetchEvents("tomocy", nil, nil)
+	parsed := g.parseArgs(args)
+	es, _, err := g.fetchEvents(parsed.uname, nil, nil)
 	if err != nil {
 		return nil, err
 	}
