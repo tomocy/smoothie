@@ -1,15 +1,56 @@
 package runner
 
 import (
+	"flag"
 	"fmt"
 	httpPkg "net/http"
 	"os"
+	"strings"
 
+	"github.com/tomocy/smoothie/app"
 	"github.com/tomocy/smoothie/domain"
 )
 
 type cli struct {
 	printer printer
+}
+
+func (c *cli) fetchPosts() error {
+	ds := c.parseDrivers(flag.Args())
+	u := newPostUsecase()
+	ps, err := u.FetchPostsOfDrivers(ds...)
+	if err != nil {
+		return err
+	}
+
+	c.ShowPosts(ps)
+
+	return nil
+}
+
+func (c *cli) parseDrivers(ds []string) []app.Driver {
+	parseds := make([]app.Driver, len(ds))
+	for i, d := range ds {
+		parseds[i] = c.parseDriver(d)
+	}
+
+	return parseds
+}
+
+func (c *cli) parseDriver(d string) app.Driver {
+	splited := strings.Split(d, ":")
+	var name string
+	var args []string
+	switch splited[0] {
+	case "gmail", "tumblr", "twitter", "reddit":
+		name, args = separateDriverAndArgs(splited, 1)
+	default:
+		name, args = separateDriverAndArgs(splited, 2)
+	}
+
+	return app.Driver{
+		Name: name, Args: args,
+	}
 }
 
 func (c *cli) ShowPosts(ps domain.Posts) {
