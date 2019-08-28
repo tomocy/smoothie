@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/tomocy/smoothie/domain"
@@ -213,6 +214,18 @@ func (g *GitHubIssues) fetchIssues(owner, repo string, params url.Values) (githu
 
 type githubIssuesArgs struct {
 	owner, repo string
+}
+
+func (as *githubIssuesArgs) parse(args []string) {
+	if len(args) <= 0 {
+		return
+	}
+
+	splited := strings.Split(args[0], "/")
+	if len(splited) == 2 {
+		as.owner = splited[0]
+		as.repo = splited[1]
+	}
 }
 
 type github struct{}
