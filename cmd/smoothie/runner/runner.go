@@ -37,7 +37,7 @@ func New() Runner {
 	case verbFetch:
 		godotenv.Load(cnf.envFilename)
 		return &Fetch{
-			cnf: cnf, presenter: newPresenter(cnf.mode, cnf.format),
+			cnf: cnf, fetcher: newFetcher(cnf.mode, cnf.format),
 		}
 	case verbStream:
 		godotenv.Load(cnf.envFilename)
@@ -185,20 +185,12 @@ type printer interface {
 }
 
 type Fetch struct {
-	cnf       config
-	presenter presenter
+	cnf     config
+	fetcher fetcher
 }
 
 func (f *Fetch) Run() error {
-	u := newPostUsecase()
-	ps, err := u.FetchPostsOfDrivers(f.cnf.joinDrivers()...)
-	if err != nil {
-		return err
-	}
-
-	f.presenter.ShowPosts(ps)
-
-	return nil
+	return f.fetcher.fetchPosts()
 }
 
 type Stream struct {
