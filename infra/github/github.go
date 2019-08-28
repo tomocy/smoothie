@@ -7,6 +7,19 @@ import (
 	"github.com/tomocy/smoothie/domain"
 )
 
+type Event struct {
+	ID    string `json:"id"`
+	Type  string `json:"type"`
+	Actor *User  `json:"actor"`
+	Repo  struct {
+		Name string `json:"name"`
+	} `json:"repo"`
+	Payload struct {
+		Action string `json:"action"`
+	} `jsno:"payload"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Issues []*Issue
 
 func (is Issues) Adapt() domain.Posts {
