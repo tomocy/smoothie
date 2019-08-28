@@ -22,6 +22,24 @@ type Event struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+func (e *Event) Adapt() *domain.Post {
+	return &domain.Post{
+		ID:        fmt.Sprint(e.ID),
+		Driver:    "github event",
+		User:      e.Actor.Adapt(),
+		Text:      e.joinText(),
+		CreatedAt: e.CreatedAt,
+	}
+}
+
+func (e *Event) joinText() string {
+	if e.Type != "WatchEvent" {
+		return ""
+	}
+
+	return fmt.Sprintf("%s %s", e.Payload.Action, e.Repo.Name)
+}
+
 type Issues []*Issue
 
 func (is Issues) Adapt() domain.Posts {
