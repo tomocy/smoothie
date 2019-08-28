@@ -13,7 +13,9 @@ import (
 	githubPkg "github.com/tomocy/smoothie/infra/github"
 )
 
-type GitHubIssue struct{}
+type GitHubIssue struct {
+	github
+}
 
 func (g *GitHubIssue) StreamPosts(ctx context.Context) (<-chan domain.Posts, <-chan error) {
 	isCh, errCh := g.streamIssues(ctx, "golang", "go", nil)
@@ -94,27 +96,6 @@ func (g *GitHubIssue) fetchIssues(owner, repo string, params url.Values) (github
 	}
 
 	return is, nil
-}
-
-func (g *GitHubIssue) do(r req, dst interface{}) error {
-	resp, err := r.do()
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if http.StatusBadRequest <= resp.StatusCode {
-		return errors.New(resp.Status)
-	}
-
-	return json.NewDecoder(resp.Body).Decode(dst)
-}
-
-func (g *GitHubIssue) endpoint(ps ...string) string {
-	parsed, _ := url.Parse("https://api.github.com")
-	ss := append([]string{parsed.Path}, ps...)
-	parsed.Path = filepath.Join(ss...)
-	return parsed.String()
 }
 
 type github struct{}
