@@ -28,7 +28,7 @@ Usage of smoothie: [optinos] drivers...
   -f string
         format (default "text")
   -m string
-        name of mode (default "cli")
+        mode (default "cli")
   -v string
         verb (default "fetch")
 ```
