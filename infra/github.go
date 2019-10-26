@@ -131,12 +131,7 @@ func (g *GitHubIssues) StreamPosts(ctx context.Context, args []string) (<-chan d
 	go func() {
 		defer close(ch)
 		for is := range isCh {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				ch <- is.Adapt()
-			}
+			ch <- is.Adapt()
 		}
 	}()
 
