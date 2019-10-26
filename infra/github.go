@@ -44,6 +44,7 @@ func (g *GitHubEvents) streamEvents(ctx context.Context, uname string, header ht
 		for {
 			select {
 			case <-ctx.Done():
+				errCh <- ctx.Err()
 				return
 			case <-time.After(time.Minute):
 				if lastETag != "" {
