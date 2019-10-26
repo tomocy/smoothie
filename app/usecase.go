@@ -95,15 +95,11 @@ func (u *PostUsecase) fanInErrors(ctx context.Context, chs ...<-chan error) <-ch
 			go func(ch <-chan error) {
 				defer wg.Done()
 				for err := range ch {
-					select {
-					case <-ctx.Done():
-						return
-					default:
-						fannedInCh <- err
-					}
+					fannedInCh <- err
 				}
 			}(ch)
 		}
+
 		wg.Wait()
 	}()
 
