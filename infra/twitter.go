@@ -39,20 +39,15 @@ type Twitter struct {
 
 func (t *Twitter) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
 	tsCh, errCh := t.streamTweets(ctx, nil)
-	psCh := make(chan domain.Posts)
+	ch := make(chan domain.Posts)
 	go func() {
-		defer close(psCh)
+		defer close(ch)
 		for ts := range tsCh {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				psCh <- ts.Adapt()
-			}
+			ch <- ts.Adapt()
 		}
 	}()
 
-	return psCh, errCh
+	return ch, errCh
 }
 
 func (t *Twitter) streamTweets(ctx context.Context, params url.Values) (<-chan twitter.Tweets, <-chan error) {

@@ -43,12 +43,7 @@ func (t *Tumblr) StreamPosts(ctx context.Context, args []string) (<-chan domain.
 	go func() {
 		defer close(ch)
 		for ps := range psCh {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				ch <- ps.Adapt()
-			}
+			ch <- ps.Adapt()
 		}
 	}()
 

@@ -25,12 +25,7 @@ func (g *GitHubEvents) StreamPosts(ctx context.Context, args []string) (<-chan d
 	go func() {
 		defer close(ch)
 		for es := range esCh {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				ch <- es.Adapt()
-			}
+			ch <- es.Adapt()
 		}
 	}()
 

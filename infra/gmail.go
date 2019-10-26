@@ -44,12 +44,7 @@ func (g *Gmail) StreamPosts(ctx context.Context, args []string) (<-chan domain.P
 	go func() {
 		defer close(ch)
 		for ms := range msCh {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				ch <- ms.Adapt()
-			}
+			ch <- ms.Adapt()
 		}
 	}()
 
