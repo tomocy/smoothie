@@ -57,10 +57,12 @@ func (t *Twitter) streamTweets(ctx context.Context, params url.Values) (<-chan t
 			close(tsCh)
 			close(errCh)
 		}()
+
 		lastID := t.fetchAndSendTweets(ctx, params, tsCh, errCh)
 		for {
 			select {
 			case <-ctx.Done():
+				errCh <- ctx.Err()
 				return
 			case <-time.After(4 * time.Minute):
 				if lastID != "" {
