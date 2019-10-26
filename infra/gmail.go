@@ -63,6 +63,7 @@ func (g *Gmail) streamMessages(ctx context.Context, params url.Values) (<-chan g
 		for {
 			select {
 			case <-ctx.Done():
+				errCh <- ctx.Err()
 				return
 			case <-time.After(5 * time.Minute):
 				if !lastCreatedAt.IsZero() {
