@@ -57,10 +57,12 @@ func (t *Tumblr) streamPosts(ctx context.Context, dst string, params url.Values)
 			close(psCh)
 			close(errCh)
 		}()
+
 		lastID := t.fetchAndSendPosts(dst, params, psCh, errCh)
 		for {
 			select {
 			case <-ctx.Done():
+				errCh <- ctx.Err()
 				return
 			case <-time.After(5 * time.Minute):
 				if lastID != "" {
