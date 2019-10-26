@@ -145,10 +145,12 @@ func (g *GitHubIssues) streamIssues(ctx context.Context, owner, repo string, par
 			close(isCh)
 			close(errCh)
 		}()
+
 		lastCreatedAt := g.fetchAndSendIssues(owner, repo, params, isCh, errCh)
 		for {
 			select {
 			case <-ctx.Done():
+				errCh <- ctx.Err()
 				return
 			case <-time.After(5 * time.Minute):
 				if !lastCreatedAt.IsZero() {
