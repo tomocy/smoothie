@@ -65,6 +65,7 @@ func (r *Reddit) streamPosts(ctx context.Context, dst string, params url.Values)
 		for {
 			select {
 			case <-ctx.Done():
+				errCh <- ctx.Err()
 				return
 			case <-time.After(2 * time.Minute):
 				if lastID != "" {
