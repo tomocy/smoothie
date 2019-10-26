@@ -35,14 +35,12 @@ func (c *cli) streamPosts(ctx context.Context) error {
 	psCh, errCh := u.StreamPostsOfDrivers(ctx, ds...)
 	for {
 		select {
-		case <-ctx.Done():
-			if err := ctx.Err(); err != context.Canceled {
-				return err
-			}
-			return nil
 		case ps := <-psCh:
 			c.ShowPosts(ps)
 		case err := <-errCh:
+			if err == context.Canceled {
+				return nil
+			}
 			return err
 		}
 	}
