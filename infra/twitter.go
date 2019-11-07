@@ -152,10 +152,10 @@ func (t *Twitter) retreiveAuthorization() (*oauth.Credentials, error) {
 	return t.handleAuthorizationRedirect()
 }
 
-func (t *Twitter) loadConfig() (twitterConfig, error) {
+func (t *Twitter) loadConfig() (oauthConfig, error) {
 	cnf, err := loadConfig()
 	if err != nil {
-		return twitterConfig{}, err
+		return oauthConfig{}, err
 	}
 
 	return cnf.Twitter, nil
@@ -196,7 +196,7 @@ func (t *Twitter) saveAccessCredentials(cred *oauth.Credentials) error {
 	return t.saveConfig(loaded)
 }
 
-func (t *Twitter) saveConfig(cnf twitterConfig) error {
+func (t *Twitter) saveConfig(cnf oauthConfig) error {
 	loaded, _ := loadConfig()
 	loaded.Twitter = cnf
 	return saveConfig(loaded)

@@ -306,30 +306,10 @@ func saveConfig(cnf config) error {
 }
 
 type config struct {
-	Gmail   gmailConfig   `json:"gmail"`
-	Tumblr  tumblrConfig  `json:"tumblr"`
-	Twitter twitterConfig `json:"twitter"`
-	Reddit  redditConfig  `json:"reddit"`
-}
-
-type gmailConfig struct {
-	oauth2Config
-}
-
-func (g *gmailConfig) isZero() bool {
-	return g.oauth2Config.isZero()
-}
-
-type tumblrConfig struct {
-	oauthConfig
-}
-
-func (c *tumblrConfig) isZero() bool {
-	return c.oauthConfig.isZero()
-}
-
-type twitterConfig struct {
-	oauthConfig
+	Gmail   oauth2Config `json:"gmail"`
+	Tumblr  oauthConfig  `json:"tumblr"`
+	Twitter oauthConfig  `json:"twitter"`
+	Reddit  oauth2Config `json:"reddit"`
 }
 
 type oauthConfig struct {
@@ -342,14 +322,6 @@ func (c *oauthConfig) isZero() bool {
 	}
 
 	return true
-}
-
-type redditConfig struct {
-	oauth2Config
-}
-
-func (c *redditConfig) isZero() bool {
-	return c.oauth2Config.isZero()
 }
 
 type oauth2Config struct {

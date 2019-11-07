@@ -142,10 +142,10 @@ func (g *Gmail) retreiveAuthorization() (*oauth2.Token, error) {
 	return g.handleAuthorizationRedirect()
 }
 
-func (g *Gmail) loadConfig() (gmailConfig, error) {
+func (g *Gmail) loadConfig() (oauth2Config, error) {
 	cnf, err := loadConfig()
 	if err != nil {
-		return gmailConfig{}, err
+		return oauth2Config{}, err
 	}
 
 	return cnf.Gmail, nil
@@ -197,7 +197,7 @@ func (g *Gmail) saveAccessToken(tok *oauth2.Token) error {
 	return g.saveConfig(cnf)
 }
 
-func (g *Gmail) saveConfig(cnf gmailConfig) error {
+func (g *Gmail) saveConfig(cnf oauth2Config) error {
 	loaded, err := loadConfig()
 	if err != nil {
 		return err

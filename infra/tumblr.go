@@ -138,10 +138,10 @@ func (t *Tumblr) retreiveAuthorization() (*oauth.Credentials, error) {
 	return t.handleAuthorizationRedirect()
 }
 
-func (t *Tumblr) loadConfig() (tumblrConfig, error) {
+func (t *Tumblr) loadConfig() (oauthConfig, error) {
 	cnf, err := loadConfig()
 	if err != nil {
-		return tumblrConfig{}, err
+		return oauthConfig{}, err
 	}
 
 	return cnf.Tumblr, nil
@@ -175,7 +175,7 @@ func (t *Tumblr) saveAccessToken(cred *oauth.Credentials) error {
 	return t.saveConfig(loaded)
 }
 
-func (t *Tumblr) saveConfig(cnf tumblrConfig) error {
+func (t *Tumblr) saveConfig(cnf oauthConfig) error {
 	loaded, err := loadConfig()
 	if err != nil {
 		return err

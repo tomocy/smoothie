@@ -140,10 +140,10 @@ func (r *Reddit) retreiveAuthorization() (*oauth2.Token, error) {
 	return r.handleAuthorizationRedirect()
 }
 
-func (r *Reddit) loadConfig() (redditConfig, error) {
+func (r *Reddit) loadConfig() (oauth2Config, error) {
 	cnf, err := loadConfig()
 	if err != nil {
-		return redditConfig{}, err
+		return oauth2Config{}, err
 	}
 
 	return cnf.Reddit, nil
@@ -197,7 +197,7 @@ func (r *Reddit) saveAccessToken(tok *oauth2.Token) error {
 	return r.saveConfig(loaded)
 }
 
-func (r *Reddit) saveConfig(cnf redditConfig) error {
+func (r *Reddit) saveConfig(cnf oauth2Config) error {
 	loaded, err := loadConfig()
 	if err != nil {
 		return err
