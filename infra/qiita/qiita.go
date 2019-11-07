@@ -9,6 +9,15 @@ import (
 
 type Items []*Item
 
+func (is Items) Adapt() domain.Posts {
+	adapteds := make(domain.Posts, len(is))
+	for i, item := range is {
+		adapteds[i] = item.Adapt()
+	}
+
+	return adapteds
+}
+
 type Item struct {
 	ID        string    `json:"id"`
 	User      *User     `json:"user"`
