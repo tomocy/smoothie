@@ -1,6 +1,10 @@
 package qiita
 
-import "time"
+import (
+	"time"
+
+	"github.com/tomocy/smoothie/domain"
+)
 
 type Item struct {
 	ID        string    `json:"id"`
@@ -13,4 +17,11 @@ type Item struct {
 type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+func (u *User) Adapt() *domain.User {
+	return &domain.User{
+		Name:     u.Name,
+		Username: u.ID,
+	}
 }
