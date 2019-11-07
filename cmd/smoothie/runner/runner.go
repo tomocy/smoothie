@@ -212,6 +212,7 @@ func newPostUsecase() *app.PostUsecase {
 		"twitter": infra.NewTwitter(
 			os.Getenv("TWITTER_CLIENT_ID"), os.Getenv("TWITTER_CLIENT_SECRET"), new(cli),
 		),
+		"qiita": new(infra.Qiita),
 		"reddit": infra.NewReddit(
 			os.Getenv("REDDIT_CLIENT_ID"), os.Getenv("REDDIT_CLIENT_SECRET"), new(cli),
 		),

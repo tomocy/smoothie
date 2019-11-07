@@ -60,7 +60,7 @@ func (c *cli) parseDriver(d string) app.Driver {
 	var name string
 	var args []string
 	switch splited[0] {
-	case "gmail", "tumblr", "twitter", "reddit":
+	case "gmail", "tumblr", "twitter", "qiita", "reddit":
 		name, args = separateDriverAndArgs(splited, 1)
 	default:
 		name, args = separateDriverAndArgs(splited, 2)
