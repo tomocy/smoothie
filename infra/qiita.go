@@ -1,18 +1,87 @@
 package infra
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"github.com/tomocy/smoothie/domain"
 	"github.com/tomocy/smoothie/infra/qiita"
 )
 
 type Qiita struct{}
+
+func (q *Qiita) StreamPosts(ctx context.Context, args []string) (<-chan domain.Posts, <-chan error) {
+	parsed := q.parseArgs(args)
+	isCh, errCh := q.streamItems(ctx, parsed.tag, nil)
+	ch := make(chan domain.Posts)
+	go func() {
+		defer close(ch)
+
+		for is := range isCh {
+			ch <- is.Adapt()
+		}
+	}()
+
+	return ch, errCh
+}
+
+func (q *Qiita) streamItems(ctx context.Context, tag string, params url.Values) (<-chan qiita.Items, <-chan error) {
+	isCh, errCh := make(chan qiita.Items), make(chan error)
+	go func() {
+		defer func() {
+			close(isCh)
+			close(errCh)
+		}()
+
+		lastCreatedAt := q.fetchAndSendItems(tag, params, isCh, errCh)
+		for {
+			select {
+			case <-ctx.Done():
+				errCh <- ctx.Err()
+				return
+			case <-time.After(time.Second):
+				if !lastCreatedAt.IsZero() {
+					if params == nil {
+						params = make(url.Values)
+					}
+					params.Add("query", fmt.Sprintf("created:>%s", lastCreatedAt))
+					log.Println(params.Get("query"))
+				}
+				if createdAt := q.fetchAndSendItems(tag, params, isCh, errCh); !createdAt.IsZero() {
+					lastCreatedAt = createdAt
+				}
+			}
+		}
+	}()
+
+	return isCh, errCh
+}
+
+func (q *Qiita) fetchAndSendItems(
+	tag string, params url.Values,
+	isCh chan<- qiita.Items, errCh chan<- error,
+) time.Time {
+	is, err := q.fetchItems(tag, params)
+	if err != nil {
+		errCh <- err
+		return time.Time{}
+	}
+	if len(is) <= 0 {
+		return time.Time{}
+	}
+
+	lastCreatedAt := is[0].CreatedAt
+	isCh <- is
+
+	return lastCreatedAt
+}
 
 func (q *Qiita) FetchPosts(args []string) (domain.Posts, error) {
 	parsed := q.parseArgs(args)
