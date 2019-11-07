@@ -52,8 +52,8 @@ func createWorkspace() error {
 }
 
 type oauthReq struct {
-	cred *oauth.Credentials
 	req
+	cred *oauth.Credentials
 }
 
 func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
@@ -65,8 +65,8 @@ func (r *oauthReq) do(client oauth.Client) (*http.Response, error) {
 }
 
 type oauth2Req struct {
-	tok *oauth2.Token
 	req
+	tok *oauth2.Token
 }
 
 func (r *oauth2Req) do(ctx context.Context, cnf oauth2.Config) (*http.Response, error) {
@@ -196,6 +196,7 @@ func (m *oauthManager) handlerForRedirect(ctx context.Context, credCh chan<- *oa
 			errCh <- err
 			return
 		}
+
 		credCh <- token
 	})
 }
