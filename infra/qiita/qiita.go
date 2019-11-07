@@ -7,6 +7,8 @@ import (
 	"github.com/tomocy/smoothie/domain"
 )
 
+type Items []*Item
+
 type Item struct {
 	ID        string    `json:"id"`
 	User      *User     `json:"user"`
