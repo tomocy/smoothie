@@ -1,6 +1,7 @@
 package qiita
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/tomocy/smoothie/domain"
@@ -12,6 +13,16 @@ type Item struct {
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+func (i *Item) Adapt() *domain.Post {
+	return &domain.Post{
+		ID:        i.ID,
+		Driver:    "qiita",
+		User:      i.User.Adapt(),
+		Text:      fmt.Sprintf("%s\n\n%s", i.Title, i.Body),
+		CreatedAt: i.CreatedAt,
+	}
 }
 
 type User struct {
