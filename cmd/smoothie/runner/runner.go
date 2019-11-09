@@ -19,8 +19,7 @@ import (
 
 func init() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s: [optinos] drivers...\n", os.Args[0])
-
+		fmt.Fprintln(os.Stderr, "Usage of smoothie: [optinos] drivers...")
 		flag.PrintDefaults()
 	}
 }
